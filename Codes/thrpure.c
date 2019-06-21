@@ -51,7 +51,7 @@ _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_
 
 #if(1)
 static const thrd_t _ThreadEmpty;
-static const char _StringVersion[16]="Date:2019.06.19";
+static const char _StringVersion[16]="Date:2019.06.21";
 #endif
 
 #if(1)
@@ -275,18 +275,21 @@ static int ThrP_Qu_Push_(thrp_qu *const Qu,THRP_P_ Proc_,const void *const Arg,c
 			else if(Pack>(Qu->Capacity))
 				return thrd_nomem;
 			else
-				for(int Flag=thrd_success;1;Flag=_ThrP_Qu_Waiting_(Qu))
-				{
-					if(Flag==thrd_success)
-						Flag=_ThrP_Qu_Attach_(Qu,Proc_,Arg,Copy,Size,Pack);
-					else
-						return Flag;
+			{
+				const int Flag=_ThrP_Qu_Attach_(Qu,Proc_,Arg,Copy,Size,Pack);
 
-					if(Flag==thrd_busy)
-						thrd_yield();
-					else
-						return Flag;
-				}
+				if(Flag==thrd_busy)
+					thrd_yield();
+				else
+					return Flag;
+			}
+			if(_ThrP_Qu_Waiting_(Qu)==thrd_success)
+				if(_ThrP_Qu_Attach_(Qu,Proc_,Arg,Copy,Size,Pack)==thrd_success)
+					return thrd_busy;
+				else
+					return thrd_error;
+			else
+				return thrd_error;
 		}
 		else
 			return thrd_error;
@@ -384,13 +387,37 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 
 #if(1)
 #if(1)
-static int ThrP_Mu_Take_(thrp_mu *const Mu)
+static int ThrP_Mu_Take_(thrp_mu *const Mu,const _Bool Wait)
 {
-	return ((Mu)?(mtx_lock(&(Mu->Tex))):(thrd_error));
+	if(Mu)
+	{
+		mtx_t *const Mutex=&(Mu->Tex);
+
+		return ((Wait)?(mtx_lock(Mutex)):(mtx_trylock(Mutex)));
+	}
+	else
+		return thrd_error;
 }
-static int ThrP_Mu_Give_(thrp_mu *const Mu)
+static int ThrP_Mu_Give_(thrp_mu *const Mu,const _Bool Wait)
 {
-	return ((Mu)?(mtx_unlock(&(Mu->Tex))):(thrd_error));
+	if(Mu)
+	{
+		mtx_t *const Mutex=&(Mu->Tex);
+		int Flag=mtx_trylock(Mutex);
+
+		switch(Flag)
+		{
+		case thrd_busy:
+			if(Wait)
+				Flag=_ThrP_Qu_Flag_(Flag,mtx_lock(Mutex));
+		case thrd_success:
+			Flag=_ThrP_Qu_Flag_(Flag,mtx_unlock(Mutex));
+		default:
+			return Flag;
+		}
+	}
+	else
+		return thrd_error;
 }
 #endif
 
@@ -550,10 +577,7 @@ THRPACK ThrP=
 		.Break=_THRP_FAILURE_
 	}
 };
-THRPACK *ThrP_(void)
-{
-	return &ThrP;
-}
+THRPACK *ThrP_(void) { return &ThrP; }
 #endif
 
 #endif

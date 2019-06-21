@@ -2,7 +2,7 @@
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.06.19	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.06.21	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_THRPURE
@@ -23,43 +23,55 @@ typedef const struct _thrp_mu THRP_MU;	//ThrPure : Mutex Constant
 struct _thrpack
 {
 	//ThrPure : Task Queue Functions
+	//＊Return value is defined under "ThrP.Flag".
 	const struct
 	{
 		//ThrPure : Task Queue Memory Allocation - Deallocate with "ThrP.Qu.Delete_".
+		//＊The thread calling this is the queue's creator thread.
 		thrp_qu*(*const Create_)(const size_t MemorySize);
 		//ThrPure : Task Queue Memory Deallocation
-		//＊Calling is only allowed in the creator thread.
-		//＊Return value is defined under "ThrP.Flag".
+		//＊This should be called only in the queue's creator thread.
+		//＊If "ThrP.Qu.Wait_" is not called properly before calling this,
+		//　then "ThrP.Flag.Busy" might be returned.
 		int(*const Delete_)(thrp_qu **const);
 
 		//ThrPure : Push a task into the task queue.
-		//＊Calling is only allowed in the creator thread.
+		//＊This should be called only in the queue's creator thread.
 		//＊Data at (ArgAddress) will be captured temporarily by (ArgSize) bytes.
-		//＊Return value is defined under "ThrP.Flag".
+		//＊If there is not enough space to capture the task of acceptable size,
+		//　then enqueueing might be delayed until the queue is finished,
+		//　and "ThrP.Flag.Busy" might be returned.
 		int(*const Push_)(thrp_qu *const,THRP_P_,const void *const ArgAddress,const size_t ArgSize);
-		//ThrPure : Wait the task queue until its current thread terminates.
-		//＊Calling is only allowed in the creator thread.
-		//＊Return value is defined under "ThrP.Flag".
+		//ThrPure : Wait the task queue and terminate the worker thread.
+		//＊This should be called before calling "ThrP.Qu.Delete_", only in the queue's creator thread.
 		int(*const Wait_)(thrp_qu *const);
 	}
 	Qu;
 
 	//ThrPure : Mutex Functions
+	//＊Return value is defined under "ThrP.Flag".
 	const struct
 	{
 		//ThrPure : Mutex Memory Allocation - Deallocate with "ThrP.Mu.Delete_".
 		thrp_mu*(*const Create_)(void);
 		//ThrPure : Mutex Memory Deallocation
 		//＊All dependencies around the mutex must be released before the deletion of it.
-		//＊Return value is defined under "ThrP.Flag".
 		int(*const Delete_)(thrp_mu **const);
 
 		//ThrPure : Lock the Mutex
-		//＊Return value is defined under "ThrP.Flag".
-		int(*const Take_)(thrp_mu *const);
+		//＊If (Wait) equals to 0,
+		//　then this could intrude into the earlier locking,
+		//　else this would wait for the earlier locking to be unlocked.
+		//＊If an intrusion is occurred,
+		//　then "ThrP.Flag.Busy" might be returned.
+		int(*const Take_)(thrp_mu *const,const _Bool Wait);
 		//ThrPure : Unlock the Mutex
-		//＊Return value is defined under "ThrP.Flag".
-		int(*const Give_)(thrp_mu *const);
+		//＊If (Wait) equals to 0,
+		//　then this could unlock the earlier locking,
+		//　else this would wait for the earlier locking to be unlocked.
+		//＊If an earlier locking exists,
+		//　then "ThrP.Flag.Busy" might be returned.
+		int(*const Give_)(thrp_mu *const,const _Bool Wait);
 	}
 	Mu;
 
@@ -80,7 +92,7 @@ struct _thrpack
 	const char *const Version;
 
 	//ThrPure : Thread Error Status
-	//＊They are possible return values of some "ThrP.Qu" functions.
+	//＊They are possible return values of some "ThrP.Qu" and "ThrP.Mu" functions.
 	const struct
 	{
 		const int Success;	//ThrPure : Successful
