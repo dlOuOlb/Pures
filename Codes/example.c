@@ -19,7 +19,10 @@ int main(void)
 	int Flag=_ThrP->Flag.Success;
 
 	if(Flag)
+	{
 		printf("ThrP.Flag.Success != 0\r\n");
+		return Flag;
+	}
 
 	_GlobalLocker=_ThrP->Mu.Create_();
 
