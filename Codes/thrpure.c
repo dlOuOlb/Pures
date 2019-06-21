@@ -409,7 +409,7 @@ static int ThrP_Mu_Give_(thrp_mu *const Mu,const _Bool Wait)
 		{
 		case thrd_busy:
 			if(Wait)
-				Flag=_ThrP_Qu_Flag_(Flag,mtx_lock(Mutex));
+				Flag=mtx_lock(Mutex);
 		case thrd_success:
 			Flag=_ThrP_Qu_Flag_(Flag,mtx_unlock(Mutex));
 		default:

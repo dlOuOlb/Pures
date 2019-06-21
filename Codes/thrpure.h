@@ -69,7 +69,7 @@ struct _thrpack
 		//＊If (Wait) equals to 0,
 		//　then this could unlock the earlier locking,
 		//　else this would wait for the earlier locking to be unlocked.
-		//＊If an earlier locking exists,
+		//＊If an earlier locking exists and is unlocked without waiting,
 		//　then "ThrP.Flag.Busy" might be returned.
 		int(*const Give_)(thrp_mu *const,const _Bool Wait);
 	}
