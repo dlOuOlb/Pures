@@ -2,7 +2,7 @@
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.06.23	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.06.24	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_THRPURE
@@ -36,9 +36,9 @@ struct _thrpack
 
 		//ThrPure : Push a task into the task queue.
 		//＊Data at (ArgAddress) will be captured temporarily by (ArgSize) bytes.
-		//＊If there is not enough space to capture the task of acceptable size,
-		//　then enqueueing might be delayed until the queue is finished,
-		//　and "ThrP.Flag.Busy" might be returned.
+		//＊If there is not enough space to capture the task,
+		//　then this would wait for the queue to be emptied,
+		//　as long as the task's size is acceptable.
 		int(*const Push_)(thrp_qu *const *const,THRP_P_,const void *const ArgAddress,const size_t ArgSize);
 		//ThrPure : Wait the task queue and terminate the worker thread.
 		//＊This should be called before "ThrP.Qu.Delete_" is called.
@@ -92,6 +92,8 @@ struct _thrpack
 
 	//ThrPure : Thread Error Status
 	//＊They are possible return values of "ThrP.Qu" and "ThrP.Mu" functions.
+	//＊When an error has occurred, terminate the program as soon as possible,
+	//　since corrupted states of multi-threads are extremely hard to resolve.
 	const struct
 	{
 		const int Success;	//ThrPure : Successful
