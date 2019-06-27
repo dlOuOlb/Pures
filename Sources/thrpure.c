@@ -6,6 +6,7 @@
 #else
 
 #if(1)
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <threads.h>
@@ -48,7 +49,7 @@ _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.06.24";
+static const char _StringVersion[16]="Date:2019.06.27";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -241,7 +242,7 @@ static int _ThrP_Qu_Stream_(thrp_qu *const Qu)
 
 	return _ThrP_Flag_(Flag,mtx_unlock(Wait));
 }
-static int _ThrP_Qu_Attach_(thrp_qu *const Qu,THRP_P_ Proc_,const void *const Arg,const size_t Copy,const size_t Size,const size_t Pack)
+static int _ThrP_Qu_Attach_(thrp_qu *const Qu,THRP_P_ Proc_,const void *const restrict Arg,const size_t Copy,const size_t Size,const size_t Pack)
 {
 	mtx_t *const Lock=&(Qu->Lock);
 	mtx_t *const Wait=&(Qu->Wait);
@@ -347,15 +348,17 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 				{
 				case thrd_busy:
 					Flag=mtx_lock(Wait);
+
 					if(Flag==thrd_success)
 					{
 				case thrd_success:
 						if(_ThrP_Exist_Thread_(Qu->Thread))
 							Flag=_ThrP_Qu_Join_(Qu);
 						else;
+
+						Flag=_ThrP_Flag_(Flag,mtx_unlock(Wait));
 					}
-					else;
-					Flag=_ThrP_Flag_(Flag,mtx_unlock(Wait));
+					else
 				default:;
 				}
 			else
@@ -370,6 +373,7 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 		else
 		{
 			mtx_unlock(LockQu);
+
 			Flag=thrd_error;
 		}
 	}
@@ -377,7 +381,7 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 
 	return Flag;
 }
-static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *const Arg,const size_t Copy)
+static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *const restrict Arg,const size_t Copy)
 {
 	_ThrP_Qu_Init_();
 
@@ -599,11 +603,18 @@ static int ThrP_Mu_Give_(thrp_mu *const *const Ptr,const _Bool Wait)
 				{
 				case thrd_busy:
 					if(Wait)
+					{
 						Flag=mtx_lock(Mutex);
-					else;
+						if(Flag==thrd_success)
+						{
 				case thrd_success:
-					Flag=_ThrP_Flag_(Flag,mtx_unlock(Mutex));
+							Flag=mtx_unlock(Mutex);
+						}
+						else
 				default:;
+					}
+					else
+						Flag=_ThrP_Flag_(Flag,mtx_unlock(Mutex));
 				}
 			else
 			{
@@ -761,13 +772,26 @@ static _Bool ThrP_Thread_Sleep_(const int *const restrict Time)
 	else
 		return _THRP_FAILURE_;
 }
-static _Bool ThrP_Thread_Yield_(const void *const Nope)
+static _Bool ThrP_Thread_Yield_(const void *const _)
 {
-	(void)(Nope);
+	(void)(_);
 
 	thrd_yield();
 
 	return _THRP_SUCCESS_;
+}
+static _Bool ThrP_Thread_Break_(const void *const _)
+{
+	(void)(_);
+
+	return _THRP_FAILURE_;
+}
+static _Bool ThrP_Thread_Print_(const char *const restrict Msg)
+{
+	if(puts(Msg)<0)
+		return _THRP_FAILURE_;
+	else
+		return _THRP_SUCCESS_;
 }
 #endif
 
@@ -791,7 +815,9 @@ THRPACK ThrP=
 	.Task=
 	{
 		.Sleep_=ThrP_Thread_Sleep_,
-		.Yield_=ThrP_Thread_Yield_
+		.Yield_=ThrP_Thread_Yield_,
+		.Break_=ThrP_Thread_Break_,
+		.Print_=ThrP_Thread_Print_
 	},
 	.Version=_StringVersion,
 	.Flag=
