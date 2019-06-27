@@ -11,13 +11,14 @@ struct _my_task
 typedef struct _my_task my_task;
 typedef const struct _my_task MY_TASK;
 
-static thrp_mu *_GlobalLocker=NULL,**const GlobalLocker=&_GlobalLocker;
 static _Bool _My_Process_(const void *const Arg);
 
 #define _My_Do_(Flag,Oper) do{if(Flag){return(Flag);}else{(Flag)=(Oper);}}while(0)
 
 int main(void)
 {
+	const char NameA[]="[Fine]";
+	const char NameB[]="[thank you]";
 	const size_t QueueBytes=1024;
 	THRPACK *const _ThrP=ThrP_();
 	thrp_qu *Qu[2]={NULL,NULL};
@@ -26,14 +27,17 @@ int main(void)
 
 	if(Flag)
 	{
-		printf("ThrP.Flag.Success != 0\r\n");
+		puts("ThrP.Flag.Success != 0");
+
 		return Flag;
 	}
 
-	Flag=_ThrP->Mu.Create_(GlobalLocker);
+	_My_Do_(Flag,_ThrP->Qu.Create_(Qu+0,QueueBytes));
+	_My_Do_(Flag,_ThrP->Qu.Create_(Qu+1,QueueBytes));
 
-	Flag=_ThrP->Qu.Create_(Qu+0,QueueBytes);
-	Flag=_ThrP->Qu.Create_(Qu+1,QueueBytes);
+	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+0,(thrp_p_)(_ThrP->Task.Print_),NameA,sizeof(NameA)));
+	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+1,(thrp_p_)(_ThrP->Task.Print_),NameB,sizeof(NameB)));
+	_My_Do_(Flag,_ThrP->Task.Yield_(NULL));
 
 	TaskHolder->Repeat=3;
 	TaskHolder->Period=250;
@@ -57,8 +61,6 @@ int main(void)
 	_My_Do_(Flag,_ThrP->Qu.Delete_(Qu+1));
 	_My_Do_(Flag,_ThrP->Qu.Delete_(Qu+0));
 
-	_My_Do_(Flag,_ThrP->Mu.Delete_(GlobalLocker));
-
 	return Flag;
 }
 
@@ -69,16 +71,12 @@ static _Bool _My_Process_(const void *const Arg)
 
 	for(int Count=0;Count<Task->Repeat;Count++)
 		if(_ThrP->Task.Sleep_(&(Task->Period))==_ThrP->Signal.Continue)
-		{
-			if(_ThrP->Mu.Take_(GlobalLocker,true)==_ThrP->Flag.Success);	//Mutex Lock
-			else return _ThrP->Signal.Break;								//Something Wrong
-
-			printf("[%3d ms] [%d/%d] %s\r\n",Task->Period,Count,Task->Repeat,Task->Msg);
-
-			if(_ThrP->Mu.Give_(GlobalLocker,false)==_ThrP->Flag.Busy);		//Mutex Unlock
-			else return _ThrP->Signal.Break;								//Something Wrong
-		}
-		else return _ThrP->Signal.Break;
+			if(printf("[%3d ms] [%d/%d] %s\r\n",Task->Period,Count,Task->Repeat,Task->Msg)<0)
+				return _ThrP->Signal.Break;
+			else
+				continue;
+		else
+			return _ThrP->Signal.Break;
 
 	return _ThrP->Signal.Continue;
 }
