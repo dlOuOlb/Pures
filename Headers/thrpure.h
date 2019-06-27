@@ -2,7 +2,7 @@
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.06.24	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.06.27	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_THRPURE
@@ -39,7 +39,7 @@ struct _thrpack
 		//＊If there is not enough space to capture the task,
 		//　then this would wait for the queue to be emptied,
 		//　as long as the task's size is acceptable.
-		int(*const Push_)(thrp_qu *const *const,THRP_P_,const void *const ArgAddress,const size_t ArgSize);
+		int(*const Push_)(thrp_qu *const *const,THRP_P_,const void *const restrict ArgAddress,const size_t ArgSize);
 		//ThrPure : Wait the task queue and terminate the worker thread.
 		//＊This should be called before "ThrP.Qu.Delete_" is called.
 		int(*const Wait_)(thrp_qu *const *const);
@@ -75,15 +75,22 @@ struct _thrpack
 	Mu;
 
 	//ThrPure : Task Functions
+	//＊Return value is defined under "ThrP.Signal".
 	const struct
 	{
 		//ThrPure : Sleep the calling thread.
-		//＊Return value is defined under "ThrP.Signal".
-		_Bool(*const Sleep_)(const int *const Milliseconds);
+		_Bool(*const Sleep_)(const int *const restrict Milliseconds);
 		//ThrPure : Yield the calling thread.
 		//＊Input value will be just ignored.
-		//＊Return value is defined under "ThrP.Signal".
+		//＊Return value will always be "ThrP.Signal.Continue".
 		_Bool(*const Yield_)(const void *const);
+		//ThrPure : Return a break signal.
+		//＊Input value will be just ignored.
+		//＊Return value will always be "ThrP.Signal.Break".
+		_Bool(*const Break_)(const void *const);
+		//ThrPure : Print a message.
+		//＊Input value must be a null-terminated character sequence.
+		_Bool(*const Print_)(const char *const restrict Message);
 	}
 	Task;
 
