@@ -2,7 +2,7 @@
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.06.27	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.07.01	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_THRPURE
