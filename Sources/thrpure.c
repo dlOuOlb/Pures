@@ -49,7 +49,7 @@ _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.06.27";
+static const char _StringVersion[16]="Date:2019.07.01";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -423,7 +423,8 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 	if(Size<sizeof(thrp_qu));
 	else if(Size<Space);
 	else if(mtx_lock(LockQu)==thrd_success)
-		if(*Ptr);
+		if(*Ptr)
+			goto UNLOCK;
 		else
 		{
 			thrp_qu *const Qu=malloc(Size);
@@ -461,9 +462,7 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 {
 	_ThrP_Qu_Init_();
 
-	int Flag=mtx_lock(LockQu);
-
-	if(Flag==thrd_success)
+	if(mtx_lock(LockQu)==thrd_success)
 	{
 		thrp_qu *const Qu=*Ptr;
 
@@ -471,32 +470,21 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 		{
 			mtx_t *const Lock=&(Qu->Lock);
 			mtx_t *const Wait=&(Qu->Wait);
-
-			Flag=mtx_trylock(Wait);
-			switch(Flag)
-			{
-			case thrd_busy:
-				Flag=_ThrP_Flag_(Flag,mtx_lock(Wait));
-			case thrd_success:
-				if(_ThrP_Exist_Thread_(Qu->Thread))
-					Flag=_ThrP_Flag_(Flag,_ThrP_Qu_Join_(Qu));
-				Flag=_ThrP_Flag_(Flag,mtx_unlock(Wait));
-			default:;
-			}
+			const int Flag=(_ThrP_Exist_Thread_(Qu->Thread))?((_ThrP_Qu_Join_(Qu)==thrd_success)?(thrd_busy):(thrd_error)):(thrd_success);
 
 			mtx_destroy(Wait);
 			mtx_destroy(Lock);
 			free(Qu);
 			*Ptr=NULL;
+
+			return _ThrP_Flag_(Flag,mtx_unlock(LockQu));
 		}
 		else
-			Flag=thrd_error;
-
-		Flag=_ThrP_Flag_(Flag,mtx_unlock(LockQu));
+			mtx_unlock(LockQu);
 	}
 	else;
 
-	return Flag;
+	return thrd_error;
 }
 #endif
 #endif
@@ -644,7 +632,8 @@ static int ThrP_Mu_Create_(thrp_mu **const Ptr)
 	_ThrP_Mu_Init_();
 
 	if(mtx_lock(LockMu)==thrd_success)
-		if(*Ptr);
+		if(*Ptr)
+			goto UNLOCK;
 		else
 		{
 			thrp_mu *const Mu=malloc(sizeof(thrp_mu));
@@ -673,38 +662,43 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 {
 	_ThrP_Mu_Init_();
 
-	int Flag=mtx_lock(LockMu);
-
-	if(Flag==thrd_success)
+	if(mtx_lock(LockMu)==thrd_success)
 	{
 		thrp_mu *const Mu=*Ptr;
 
 		if(Mu)
 		{
 			mtx_t *const Mutex=&(Mu->Tex);
+			const int Flag=mtx_trylock(Mutex);
 
-			Flag=mtx_trylock(Mutex);
 			switch(Flag)
 			{
 			case thrd_busy:
-				Flag=_ThrP_Flag_(Flag,mtx_lock(Mutex));
+				if(mtx_unlock(LockMu)==thrd_success);else break;
+				if(mtx_lock(Mutex)==thrd_success);else break;
+				if(mtx_lock(LockMu)==thrd_success)
 			case thrd_success:
-				Flag=_ThrP_Flag_(Flag,mtx_unlock(Mutex));
-			default:;
-			}
+					if(mtx_unlock(Mutex)==thrd_success)
+					{
+						mtx_destroy(Mutex);
+						free(Mu);
+						*Ptr=NULL;
 
-			mtx_destroy(Mutex);
-			free(Mu);
-			*Ptr=NULL;
+						return _ThrP_Flag_(Flag,mtx_unlock(LockMu));
+					}
+					else
+			default:
+						mtx_unlock(LockMu);
+				else
+					mtx_unlock(Mutex);
+			}
 		}
 		else
-			Flag=thrd_error;
-
-		Flag=_ThrP_Flag_(Flag,mtx_unlock(LockMu));
+			mtx_unlock(LockMu);
 	}
 	else;
 
-	return Flag;
+	return thrd_error;
 }
 #endif
 #endif
