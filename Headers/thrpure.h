@@ -2,13 +2,16 @@
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.07.01	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.07.03	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_THRPURE
 #define _INC_THRPURE
 
 #include <stddef.h>
+
+typedef void(*thrp_e_)(const void *const);			//ThrPure : Event Variable
+typedef void(*const THRP_E_)(const void *const);	//ThrPure : Event Constant
 
 typedef _Bool(*thrp_p_)(const void *const);			//ThrPure : Task Process Variable
 typedef _Bool(*const THRP_P_)(const void *const);	//ThrPure : Task Process Constant
@@ -23,6 +26,7 @@ typedef const struct _thrp_mu THRP_MU;	//ThrPure : Mutex Constant
 struct _thrpack
 {
 	//ThrPure : Task Queue Functions
+	//＊This function set has its global mutex internally.
 	//＊Return value is defined under "ThrP.Flag".
 	const struct
 	{
@@ -39,6 +43,7 @@ struct _thrpack
 		//＊If there is not enough space to capture the task,
 		//　then this would wait for the queue to be emptied,
 		//　as long as the task's size is acceptable.
+		//＊The callee must return, not exit.
 		int(*const Push_)(thrp_qu *const *const,THRP_P_,const void *const restrict ArgAddress,const size_t ArgSize);
 		//ThrPure : Wait the task queue and terminate the worker thread.
 		//＊This should be called before "ThrP.Qu.Delete_" is called.
@@ -47,6 +52,7 @@ struct _thrpack
 	Qu;
 
 	//ThrPure : Mutex Functions
+	//＊This function set has its global mutex internally.
 	//＊Return value is defined under "ThrP.Flag".
 	const struct
 	{
@@ -94,11 +100,22 @@ struct _thrpack
 	}
 	Task;
 
+	//ThrPure : Event Functions
+	//＊Return value is defined under "ThrP.Flag".
+	const struct
+	{
+		//ThrPure : Invoke an event.
+		//＊Data at (ArgAddress) will be captured temporarily by (ArgSize) bytes.
+		//＊The callee must return, not exit.
+		int(*const Invoke_)(THRP_E_,const void *const restrict ArgAddress,const size_t ArgSize);
+	}
+	Event;
+
 	//ThrPure : Library Version - "Date:yyyy.mm.dd"
 	const char *const Version;
 
 	//ThrPure : Thread Error Status
-	//＊They are possible return values of "ThrP.Qu" and "ThrP.Mu" functions.
+	//＊They are possible return values of "ThrP.Qu", "ThrP.Mu", and "ThrP.Event" functions.
 	//＊When an error has occurred, terminate the program as soon as possible,
 	//　since corrupted states of multi-threads are extremely hard to resolve.
 	const struct
@@ -112,7 +129,7 @@ struct _thrpack
 	Flag;
 
 	//ThrPure : Process Return Signal
-	//＊They are allowed return values of "thrp_p_" or "THRP_P_" type functions.
+	//＊They are allowed return values of "thrp_p_" and "THRP_P_" type functions.
 	const struct
 	{
 		const _Bool Continue;	//ThrPure : Continue the task queue. (Success)
