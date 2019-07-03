@@ -17,7 +17,11 @@
 #if(1)
 struct _thrp_tp
 {
-	thrp_p_ Proc_;
+	union
+	{
+		thrp_e_ Event_;
+		thrp_p_ Proc_;
+	};
 	size_t Size;
 };
 typedef struct _thrp_tp thrp_tp;
@@ -40,6 +44,7 @@ struct _thrp_mu
 
 _Static_assert(sizeof(char)==1,"sizeof(char) != 1");
 _Static_assert(sizeof(void*)==sizeof(size_t),"sizeof(void*) != sizeof(size_t)");
+_Static_assert(sizeof(thrp_e_)==sizeof(thrp_p_),"sizeof(thrp_e_) != sizeof(thrp_p_)");
 _Static_assert(sizeof(int)<=sizeof(time_t),"sizeof(int) > sizeof(time_t)");
 _Static_assert((sizeof(thrp_tp)%sizeof(size_t))==0,"sizeof(thrp_tp)%sizeof(size_t) != 0");
 _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_t) != 0");
@@ -49,7 +54,7 @@ _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.07.01";
+static const char _StringVersion[16]="Date:2019.07.03";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -790,6 +795,63 @@ static _Bool ThrP_Thread_Print_(const char *const restrict Msg)
 #endif
 
 #if(1)
+static int _ThrP_Event_Thread_(thrp_tp *const Task)
+{
+	const void *const Arg=(Task->Size)?(Task+1):(NULL);
+
+	Task->Event_(Arg);
+
+	free(Task);
+
+	return thrd_success;
+}
+static int _ThrP_Event_Launch_(thrp_tp *const Task)
+{
+	thrd_t Thread;
+	int Flag=thrd_create(&Thread,(thrd_start_t)_ThrP_Event_Thread_,Task);
+
+	if(Flag==thrd_success)
+		Flag=thrd_detach(Thread);
+	else
+		free(Task);
+
+	return Flag;
+}
+static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const restrict Arg,const size_t Copy)
+{
+	if(Event_)
+	{
+		const size_t Size=_ThrP_Padding_(Copy);
+		const size_t Pack=Size+sizeof(thrp_tp);
+
+		if(Size<Copy);
+		else if(Pack<Size);
+		else
+		{
+			thrp_tp *const Hold=malloc(Pack);
+
+			if(Hold)
+			{
+				Hold->Event_=Event_;
+				Hold->Size=Size;
+
+				if(Copy)
+					memcpy(Hold+1,Arg,Copy);
+				else;
+
+				return _ThrP_Event_Launch_(Hold);
+			}
+			else
+				return thrd_nomem;
+		}
+	}
+	else;
+
+	return thrd_error;
+}
+#endif
+
+#if(1)
 THRPACK ThrP=
 {
 	.Qu=
@@ -812,6 +874,10 @@ THRPACK ThrP=
 		.Yield_=ThrP_Thread_Yield_,
 		.Break_=ThrP_Thread_Break_,
 		.Print_=ThrP_Thread_Print_
+	},
+	.Event=
+	{
+		.Invoke_=ThrP_Event_Invoke_
 	},
 	.Version=_StringVersion,
 	.Flag=
