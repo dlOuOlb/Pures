@@ -1,4 +1,8 @@
-﻿#include <stdbool.h>
+﻿#ifdef _MSC_BUILD
+#define restrict __restrict
+#endif
+
+#include <stdbool.h>
 #include <stdio.h>
 #include "thrpure.h"
 
@@ -20,11 +24,11 @@ int main(void)
 	const char NameA[]="[Fine]";
 	const char NameB[]="[thank you]";
 	const size_t QueueBytes=1024;
-	THRPACK *const _ThrP=ThrP_();
+	THRPACK T=*ThrP_();
 	thrp_qu *Qu[2]={NULL,NULL};
 	my_task _TaskHolder,*const TaskHolder=&_TaskHolder;
-	int Flag=_ThrP->Flag.Success;
-
+	int Flag=T.Flag.Success;
+	
 	if(Flag)
 	{
 		puts("ThrP.Flag.Success != 0");
@@ -32,51 +36,51 @@ int main(void)
 		return Flag;
 	}
 
-	_My_Do_(Flag,_ThrP->Qu.Create_(Qu+0,QueueBytes));
-	_My_Do_(Flag,_ThrP->Qu.Create_(Qu+1,QueueBytes));
+	_My_Do_(Flag,T.Qu.Create_(Qu+0,QueueBytes));
+	_My_Do_(Flag,T.Qu.Create_(Qu+1,QueueBytes));
 
-	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+0,(thrp_p_)(_ThrP->Task.Print_),NameA,sizeof(NameA)));
-	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+1,(thrp_p_)(_ThrP->Task.Print_),NameB,sizeof(NameB)));
-	_My_Do_(Flag,_ThrP->Task.Yield_(NULL));
+	_My_Do_(Flag,T.Qu.Push_(Qu+0,(thrp_p_)(T.Task.Print_),NameA,sizeof(NameA)));
+	_My_Do_(Flag,T.Qu.Push_(Qu+1,(thrp_p_)(T.Task.Print_),NameB,sizeof(NameB)));
+	_My_Do_(Flag,T.Task.Yield_(NULL));
 
 	TaskHolder->Repeat=3;
 	TaskHolder->Period=250;
 	TaskHolder->Msg="Hi, there!";
-	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+0,_My_Process_,TaskHolder,sizeof(my_task)));
+	_My_Do_(Flag,T.Qu.Push_(Qu+0,_My_Process_,TaskHolder,sizeof(my_task)));
 
 	TaskHolder->Msg="Who are you?";
-	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+1,_My_Process_,TaskHolder,sizeof(my_task)));
+	_My_Do_(Flag,T.Qu.Push_(Qu+1,_My_Process_,TaskHolder,sizeof(my_task)));
 
 	TaskHolder->Repeat=5;
 	TaskHolder->Period=500;
 	TaskHolder->Msg="I'm Fine, thank you.";
-	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+0,_My_Process_,TaskHolder,sizeof(my_task)));
+	_My_Do_(Flag,T.Qu.Push_(Qu+0,_My_Process_,TaskHolder,sizeof(my_task)));
 
 	TaskHolder->Msg="Nice to meet you, Fine.";
-	_My_Do_(Flag,_ThrP->Qu.Push_(Qu+1,_My_Process_,TaskHolder,sizeof(my_task)));
+	_My_Do_(Flag,T.Qu.Push_(Qu+1,_My_Process_,TaskHolder,sizeof(my_task)));
 
-	_My_Do_(Flag,_ThrP->Qu.Wait_(Qu+0));
-	_My_Do_(Flag,_ThrP->Qu.Wait_(Qu+1));
+	_My_Do_(Flag,T.Qu.Wait_(Qu+0));
+	_My_Do_(Flag,T.Qu.Wait_(Qu+1));
 
-	_My_Do_(Flag,_ThrP->Qu.Delete_(Qu+1));
-	_My_Do_(Flag,_ThrP->Qu.Delete_(Qu+0));
+	_My_Do_(Flag,T.Qu.Delete_(Qu+1));
+	_My_Do_(Flag,T.Qu.Delete_(Qu+0));
 
 	return Flag;
 }
 
 static _Bool _My_Process_(const void *const Arg)
 {
-	THRPACK *const _ThrP=ThrP_();
+	THRPACK T=*ThrP_();
 	MY_TASK *const Task=Arg;
 
 	for(int Count=0;Count<Task->Repeat;Count++)
-		if(_ThrP->Task.Sleep_(&(Task->Period))==_ThrP->Signal.Continue)
+		if(T.Task.Sleep_(&(Task->Period))==T.Signal.Continue)
 			if(printf("[%3d ms] [%d/%d] %s\r\n",Task->Period,Count,Task->Repeat,Task->Msg)<0)
-				return _ThrP->Signal.Break;
+				return T.Signal.Break;
 			else
 				continue;
 		else
-			return _ThrP->Signal.Break;
+			return T.Signal.Break;
 
-	return _ThrP->Signal.Continue;
+	return T.Signal.Continue;
 }
