@@ -1,3 +1,4 @@
-LIBRARY thrpure.dll
+LIBRARY pures.dll
 EXPORTS
 	ThrP_
+	StrP_
