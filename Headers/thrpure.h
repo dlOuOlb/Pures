@@ -2,7 +2,7 @@
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.07.03	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.07.09	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_THRPURE
@@ -115,16 +115,16 @@ struct _thrpack
 	const char *const Version;
 
 	//ThrPure : Thread Error Status
-	//＊They are possible return values of "ThrP.Qu", "ThrP.Mu", and "ThrP.Event" functions.
+	//＊They are known return values of "ThrP.Qu", "ThrP.Mu", and "ThrP.Event" functions.
 	//＊When an error has occurred, terminate the program as soon as possible,
 	//　since corrupted states of multi-threads are extremely hard to resolve.
 	const struct
 	{
-		const int Success;	//ThrPure : Successful
-		const int TimedOut;	//ThrPure : Timed Out
-		const int Busy;		//ThrPure : Temporary Unavailable Resource
-		const int NoMem;	//ThrPure : Out of Memory Condition
-		const int Error;	//ThrPure : Unknown
+		const int Success;	//ThrPure : Successful.
+		const int TimedOut;	//ThrPure : Timed out.
+		const int Busy;		//ThrPure : Temporary unavailable resource.
+		const int NoMem;	//ThrPure : Out of memory condition.
+		const int Error;	//ThrPure : Unknown error.
 	}
 	Flag;
 
