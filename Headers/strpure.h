@@ -2,7 +2,7 @@
 /*	StrPure provides some rigid string handling functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.07.08	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.07.09	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_STRPURE
@@ -138,13 +138,13 @@ struct _strpack
 		const struct
 		{
 			//StrPure : Crop for char [0x0010]
-			int(*const x0010_)(strp_nc_0x0010 *const Target,STRP_NC_0X0010 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0010_)(strp_nc_0x0010 *const restrict Target,STRP_NC_0X0010 *const restrict Source,const size_t Offset,const size_t Length);
 			//StrPure : Crop for char [0x0040]
-			int(*const x0040_)(strp_nc_0x0040 *const Target,STRP_NC_0X0040 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0040_)(strp_nc_0x0040 *const restrict Target,STRP_NC_0X0040 *const restrict Source,const size_t Offset,const size_t Length);
 			//StrPure : Crop for char [0x0100]
-			int(*const x0100_)(strp_nc_0x0100 *const Target,STRP_NC_0X0100 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0100_)(strp_nc_0x0100 *const restrict Target,STRP_NC_0X0100 *const restrict Source,const size_t Offset,const size_t Length);
 			//StrPure : Crop for char [0x0400]
-			int(*const x0400_)(strp_nc_0x0400 *const Target,STRP_NC_0X0400 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0400_)(strp_nc_0x0400 *const restrict Target,STRP_NC_0X0400 *const restrict Source,const size_t Offset,const size_t Length);
 		}
 		Crop;
 
@@ -341,13 +341,13 @@ struct _strpack
 		const struct
 		{
 			//StrPure : Crop for wchar_t [0x0010]
-			int(*const x0010_)(strp_wc_0x0010 *const Target,STRP_WC_0X0010 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0010_)(strp_wc_0x0010 *const restrict Target,STRP_WC_0X0010 *const restrict Source,const size_t Offset,const size_t Length);
 			//StrPure : Crop for wchar_t [0x0040]
-			int(*const x0040_)(strp_wc_0x0040 *const Target,STRP_WC_0X0040 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0040_)(strp_wc_0x0040 *const restrict Target,STRP_WC_0X0040 *const restrict Source,const size_t Offset,const size_t Length);
 			//StrPure : Crop for wchar_t [0x0100]
-			int(*const x0100_)(strp_wc_0x0100 *const Target,STRP_WC_0X0100 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0100_)(strp_wc_0x0100 *const restrict Target,STRP_WC_0X0100 *const restrict Source,const size_t Offset,const size_t Length);
 			//StrPure : Crop for wchar_t [0x0400]
-			int(*const x0400_)(strp_wc_0x0400 *const Target,STRP_WC_0X0400 *const Source,const size_t Offset,const size_t Length);
+			int(*const x0400_)(strp_wc_0x0400 *const restrict Target,STRP_WC_0X0400 *const restrict Source,const size_t Offset,const size_t Length);
 		}
 		Crop;
 
