@@ -1,8 +1,15 @@
 ﻿#ifdef __STDC__
+
 #if(__STDC__)
+
 #ifdef __STDC_VERSION__
+
 #if(__STDC_VERSION__<201710L)
 #error The compiler does not satisfy the C18 Standard.
+#else
+
+#ifdef __STDC_NO_THREADS__
+#error The compiler does not support the thread library.
 #else
 
 #if(1)
@@ -54,7 +61,7 @@ _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.07.03";
+static const char _StringVersion[16]="Date:2019.07.09";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -895,6 +902,8 @@ THRPACK ThrP=
 	}
 };
 THRPACK *ThrP_(void) { return &ThrP; }
+#endif
+
 #endif
 
 #endif
