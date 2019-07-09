@@ -38,7 +38,7 @@ _Static_assert(RSIZE_MAX>(0x0400*sizeof(wchar_t)),"RSIZE_MAX <= (0x0400*sizeof(w
 #endif
 
 #if(1)
-static const char _StringVersion[16]="2019.07.08";
+static const char _StringVersion[16]="2019.07.09";
 #endif
 
 #if(1)

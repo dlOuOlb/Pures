@@ -19,7 +19,7 @@ static size_t Func_(TT,Search,XXXX)(TT_XXXX *const String,TT_XXXX *const SubStri
 }
 static int Func_(TT,Reset,XXXX)(tt_xxxx *const restrict String)
 {
-	return memset_s(String,sizeof(tt_xxxx),0,sizeof(tt_xxxx));
+	return memset_s(String->TT,sizeof(tt_xxxx),0,sizeof(tt_xxxx));
 }
 
 static int Func_(TT,Copy,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source)
@@ -30,13 +30,13 @@ static int Func_(TT,Conc,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const res
 {
 	return _StrP_Conc_(Target->TT,OxXXXX,Source->TT);
 }
-static int Func_(TT,Crop,XXXX)(tt_xxxx *const Target,TT_XXXX *const Source,const size_t Offset,const size_t Length)
+static int Func_(TT,Crop,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source,const size_t Offset,const size_t Length)
 {
 	const size_t Limit=_StrP_Length_(Source->TT,OxXXXX);
 
 	if(Limit<OxXXXX)
 	{
-		const size_t There=Offset+Length;
+		volatile const size_t There=Offset+Length;
 
 		if(Offset>There);
 		else if(There>Limit);
@@ -47,6 +47,7 @@ static int Func_(TT,Crop,XXXX)(tt_xxxx *const Target,TT_XXXX *const Source,const
 
 	if(Target)
 		Target->TT[0]=0;
+	else;
 	
 	return ERANGE;
 }

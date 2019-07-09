@@ -77,10 +77,10 @@ static int _ThrP_Flag_(const int Flag,const int Temp)
 {
 	return ((Temp==thrd_success)?(Flag):(Temp));
 }
-static size_t _ThrP_Padding_(size_t Value)
+static size_t _ThrP_Padding_(volatile size_t Value)
 {
-	Value+=sizeof(size_t);
 	Value--;
+	Value+=sizeof(size_t);
 	Value/=sizeof(size_t);
 	Value*=sizeof(size_t);
 
@@ -293,9 +293,8 @@ RETRY:
 							Flag=_ThrP_Flag_(Flag,mtx_unlock(Wait));
 					}
 					else
-					{
-NEW_STREAM:				Flag=thrd_create(&(Qu->Thread),(thrd_start_t)_ThrP_Qu_Stream_,Qu);
-					}
+NEW_STREAM:
+						Flag=thrd_create(&(Qu->Thread),(thrd_start_t)_ThrP_Qu_Stream_,Qu);
 				else;
 			}
 
@@ -399,8 +398,8 @@ static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *con
 
 	if(Proc_)
 	{
-		const size_t Size=_ThrP_Padding_(Copy);
-		const size_t Pack=Size+sizeof(thrp_tp);
+		volatile const size_t Size=_ThrP_Padding_(Copy);
+		volatile const size_t Pack=Size+sizeof(thrp_tp);
 
 		if(Size<Copy);
 		else if(Pack<Size);
@@ -430,7 +429,7 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 {
 	_ThrP_Qu_Init_();
 
-	const size_t Size=_ThrP_Padding_(Space);
+	volatile const size_t Size=_ThrP_Padding_(Space);
 
 	if(Size<sizeof(thrp_qu));
 	else if(Size<Space);
@@ -733,7 +732,7 @@ static _Bool _ThrP_Thread_Nsec_(long *const restrict Nsec,const int Time)
 {
 	const int Mod=1000;
 	const long Mul=1000000;
-	long Temp[2];
+	volatile long Temp[2];
 
 	Temp[0]=Time%Mod;
 	*Nsec=Mul*Temp[0];
@@ -828,8 +827,8 @@ static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const restrict Arg,cons
 {
 	if(Event_)
 	{
-		const size_t Size=_ThrP_Padding_(Copy);
-		const size_t Pack=Size+sizeof(thrp_tp);
+		volatile const size_t Size=_ThrP_Padding_(Copy);
+		volatile const size_t Pack=Size+sizeof(thrp_tp);
 
 		if(Size<Copy);
 		else if(Pack<Size);
