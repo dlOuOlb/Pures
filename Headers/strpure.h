@@ -2,13 +2,14 @@
 /*	StrPure provides some rigid string handling functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.07.09	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.07.10	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_STRPURE
 #define _INC_STRPURE
 
 #include <stddef.h>
+#include <stdio.h>
 
 #define _StrP_Define_(type,form,FORM,Nums) struct _strp_##form##_0x##Nums{type FORM[0x##Nums];};typedef struct _strp_##form##_0x##Nums strp_##form##_0x##Nums;typedef const struct _strp_##form##_0x##Nums STRP_##FORM##_0X##Nums;
 
@@ -227,6 +228,38 @@ struct _strpack
 			x0400;
 		}
 		Cast;
+
+		//StrPure : String Put Functions
+		//＊If (Stream) is NULL, then (stdout) will be used.
+		//＊Return value is defined under "StrP.Bool".
+		const struct
+		{
+			//StrPure : Put string for char [0x0010]
+			_Bool(*const x0010_)(STRP_NC_0X0010 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Put string for char [0x0040]
+			_Bool(*const x0040_)(STRP_NC_0X0040 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Put string for char [0x0100]
+			_Bool(*const x0100_)(STRP_NC_0X0100 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Put string for char [0x0400]
+			_Bool(*const x0400_)(STRP_NC_0X0400 *const restrict String,FILE *const restrict Stream);
+		}
+		Puts;
+
+		//StrPure : String Get Functions
+		//＊If (Stream) is NULL, then (stdin) will be used.
+		//＊Return value is defined under "StrP.Bool".
+		const struct
+		{
+			//StrPure : Get string for char [0x0010]
+			_Bool(*const x0010_)(strp_nc_0x0010 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Get string for char [0x0040]
+			_Bool(*const x0040_)(strp_nc_0x0040 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Get string for char [0x0100]
+			_Bool(*const x0100_)(strp_nc_0x0100 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Get string for char [0x0400]
+			_Bool(*const x0400_)(strp_nc_0x0400 *const restrict String,FILE *const restrict Stream);
+		}
+		Gets;
 	}
 	NC;
 
@@ -430,6 +463,38 @@ struct _strpack
 			x0400;
 		}
 		Cast;
+
+		//StrPure : String Put Functions
+		//＊If (Stream) is NULL, then (stdout) will be used.
+		//＊Return value is defined under "StrP.Bool".
+		const struct
+		{
+			//StrPure : Put string for wchar_t [0x0010]
+			_Bool(*const x0010_)(STRP_WC_0X0010 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Put string for wchar_t [0x0040]
+			_Bool(*const x0040_)(STRP_WC_0X0040 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Put string for wchar_t [0x0100]
+			_Bool(*const x0100_)(STRP_WC_0X0100 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Put string for wchar_t [0x0400]
+			_Bool(*const x0400_)(STRP_WC_0X0400 *const restrict String,FILE *const restrict Stream);
+		}
+		Puts;
+
+		//StrPure : String Get Functions
+		//＊If (Stream) is NULL, then (stdin) will be used.
+		//＊Return value is defined under "StrP.Bool".
+		const struct
+		{
+			//StrPure : Get string for wchar_t [0x0010]
+			_Bool(*const x0010_)(strp_wc_0x0010 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Get string for wchar_t [0x0040]
+			_Bool(*const x0040_)(strp_wc_0x0040 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Get string for wchar_t [0x0100]
+			_Bool(*const x0100_)(strp_wc_0x0100 *const restrict String,FILE *const restrict Stream);
+			//StrPure : Get string for wchar_t [0x0400]
+			_Bool(*const x0400_)(strp_wc_0x0400 *const restrict String,FILE *const restrict Stream);
+		}
+		Gets;
 	}
 	WC;
 
@@ -445,6 +510,14 @@ struct _strpack
 
 	//StrPure : Library Version - "Date:yyyy.mm.dd"
 	const char *const Version;
+
+	//StrPure : Boolean Return Values
+	const struct
+	{
+		const _Bool Success;	//StrPure : No problem.
+		const _Bool Failure;	//StrPure : Something wrong.
+	}
+	Bool;
 };
 typedef struct _strpack strpack;		//StrPure : Library Pack Variable (Prohibited)
 typedef const struct _strpack STRPACK;	//StrPure : Library Pack Constant
