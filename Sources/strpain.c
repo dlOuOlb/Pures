@@ -62,6 +62,17 @@ static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const res
 	return _StrP_Cast_(Target,OxXXXX,Source,Limit);
 }
 
+static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const restrict Stream)
+{
+	if(String)
+		if(_StrP_Gets_(String->TT,OxXXXX,(Stream)?(Stream):(stdin))==(String->TT))
+			return _STRP_SUCCESS_;
+		else
+			return _STRP_FAILURE_;
+	else
+		return _STRP_FAILURE_;
+}
+
 #else
 
 #if(1)
@@ -93,6 +104,7 @@ static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const res
 #define _StrP_Conc_ strcat_s
 #define _StrP_Comp_ strncmp
 #define _StrP_Cast_ strncpy_s
+#define _StrP_Gets_ fgets
 
 #define XXXX 0010
 #include "strpain.c"
@@ -107,6 +119,7 @@ static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const res
 #include "strpain.c"
 #undef XXXX
 
+#undef _StrP_Gets_
 #undef _StrP_Cast_
 #undef _StrP_Comp_
 #undef _StrP_Conc_
@@ -130,6 +143,7 @@ static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const res
 #define _StrP_Conc_ wcscat_s
 #define _StrP_Comp_ wcsncmp
 #define _StrP_Cast_ wcsncpy_s
+#define _StrP_Gets_ fgetws
 
 #define XXXX 0010
 #include "strpain.c"
@@ -144,6 +158,7 @@ static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const res
 #include "strpain.c"
 #undef XXXX
 
+#undef _StrP_Gets_
 #undef _StrP_Cast_
 #undef _StrP_Comp_
 #undef _StrP_Conc_

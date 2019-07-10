@@ -34,11 +34,37 @@ _Static_assert(sizeof(errno_t)==sizeof(int),"sizeof(errno_t) != sizeof(int)");
 _Static_assert(sizeof(rsize_t)==sizeof(size_t),"sizeof(rsize_t) != sizeof(size_t)");
 _Static_assert(RSIZE_MAX>(0x0400*sizeof(wchar_t)),"RSIZE_MAX <= (0x0400*sizeof(wchar_t))");
 
+#define _STRP_SUCCESS_ ((_Bool)(0))
+#define _STRP_FAILURE_ ((_Bool)(1))
+
 #include "strpain.c"
 #endif
 
 #if(1)
-static const char _StringVersion[16]="2019.07.09";
+static const char _StringVersion[16]="2019.07.10";
+#endif
+
+#if(1)
+static _Bool StrP_NC_Puts_(const char *const restrict String,FILE *const restrict Stream)
+{
+	if(String)
+		if(fputs(String,(Stream)?(Stream):(stdout))<0)
+			return _STRP_FAILURE_;
+		else
+			return _STRP_SUCCESS_;
+	else
+		return _STRP_FAILURE_;
+}
+static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const restrict Stream)
+{
+	if(String)
+		if(fputws(String,(Stream)?(Stream):(stdout))<0)
+			return _STRP_FAILURE_;
+		else
+			return _STRP_SUCCESS_;
+	else
+		return _STRP_FAILURE_;
+}
 #endif
 
 #if(1)
@@ -135,6 +161,20 @@ STRPACK StrP=
 				.x0100_=(int(*)(strp_nc_0x0400 *const restrict,STRP_NC_0X0100 *const restrict))(StrP_NC_Cast_0x0100_),
 				.x0400_=(int(*)(strp_nc_0x0400 *const restrict,STRP_NC_0X0400 *const restrict))(StrP_NC_Cast_0x0400_)
 			}
+		},
+		.Puts=
+		{
+			.x0010_=(_Bool(*)(STRP_NC_0X0010 *const restrict,FILE *const restrict))(StrP_NC_Puts_),
+			.x0040_=(_Bool(*)(STRP_NC_0X0040 *const restrict,FILE *const restrict))(StrP_NC_Puts_),
+			.x0100_=(_Bool(*)(STRP_NC_0X0100 *const restrict,FILE *const restrict))(StrP_NC_Puts_),
+			.x0400_=(_Bool(*)(STRP_NC_0X0400 *const restrict,FILE *const restrict))(StrP_NC_Puts_)
+		},
+		.Gets=
+		{
+			.x0010_=StrP_NC_Gets_0x0010_,
+			.x0040_=StrP_NC_Gets_0x0040_,
+			.x0100_=StrP_NC_Gets_0x0100_,
+			.x0400_=StrP_NC_Gets_0x0400_
 		}
 	},
 	.WC=
@@ -228,6 +268,20 @@ STRPACK StrP=
 				.x0100_=(int(*)(strp_wc_0x0400 *const restrict,STRP_WC_0X0100 *const restrict))(StrP_WC_Cast_0x0100_),
 				.x0400_=(int(*)(strp_wc_0x0400 *const restrict,STRP_WC_0X0400 *const restrict))(StrP_WC_Cast_0x0400_)
 			}
+		},
+		.Puts=
+		{
+			.x0010_=(_Bool(*)(STRP_WC_0X0010 *const restrict,FILE *const restrict))(StrP_WC_Puts_),
+			.x0040_=(_Bool(*)(STRP_WC_0X0040 *const restrict,FILE *const restrict))(StrP_WC_Puts_),
+			.x0100_=(_Bool(*)(STRP_WC_0X0100 *const restrict,FILE *const restrict))(StrP_WC_Puts_),
+			.x0400_=(_Bool(*)(STRP_WC_0X0400 *const restrict,FILE *const restrict))(StrP_WC_Puts_)
+		},
+		.Gets=
+		{
+			.x0010_=StrP_WC_Gets_0x0010_,
+			.x0040_=StrP_WC_Gets_0x0040_,
+			.x0100_=StrP_WC_Gets_0x0100_,
+			.x0400_=StrP_WC_Gets_0x0400_
 		}
 	},
 	.Errno=
@@ -237,7 +291,12 @@ STRPACK StrP=
 		.IlSeq=EILSEQ,
 		.Range=ERANGE
 	},
-	.Version=_StringVersion
+	.Version=_StringVersion,
+	.Bool=
+	{
+		.Success=_STRP_SUCCESS_,
+		.Failure=_STRP_FAILURE_
+	}
 };
 STRPACK *StrP_(void) { return &StrP; }
 #endif
