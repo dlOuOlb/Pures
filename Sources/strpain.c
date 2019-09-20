@@ -66,11 +66,11 @@ static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const rest
 {
 	if(String)
 		if(_StrP_Gets_(String->TT,OxXXXX,(Stream)?(Stream):(stdin))==(String->TT))
-			return _STRP_SUCCESS_;
+			return _SUCCESS_;
 		else
-			return _STRP_FAILURE_;
+			return _FAILURE_;
 	else
-		return _STRP_FAILURE_;
+		return _FAILURE_;
 }
 
 #else

@@ -1,23 +1,5 @@
-﻿#ifdef __STDC__
-
-#if(__STDC__)
-
-#ifdef __STDC_VERSION__
-
-#if(__STDC_VERSION__<201710L)
-#error The compiler does not satisfy the C18 Standard.
-#else
-
-#ifdef __STDC_LIB_EXT1__
-
-#if(1)
-#define __STDC_WANT_LIB_EXT1__ (1)
-#include <errno.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <wchar.h>
+﻿#if(1)
+#include "stdpain.h"
 #include "strpure.h"
 #endif
 
@@ -34,14 +16,11 @@ _Static_assert(sizeof(errno_t)==sizeof(int),"sizeof(errno_t) != sizeof(int)");
 _Static_assert(sizeof(rsize_t)==sizeof(size_t),"sizeof(rsize_t) != sizeof(size_t)");
 _Static_assert(RSIZE_MAX>(0x0400*sizeof(wchar_t)),"RSIZE_MAX <= (0x0400*sizeof(wchar_t))");
 
-#define _STRP_SUCCESS_ ((_Bool)(0))
-#define _STRP_FAILURE_ ((_Bool)(1))
-
 #include "strpain.c"
 #endif
 
 #if(1)
-static const char _StringVersion[16]="2019.07.10";
+static const char _StringVersion[16]="2019.09.19";
 #endif
 
 #if(1)
@@ -49,21 +28,21 @@ static _Bool StrP_NC_Puts_(const char *const restrict String,FILE *const restric
 {
 	if(String)
 		if(fputs(String,(Stream)?(Stream):(stdout))<0)
-			return _STRP_FAILURE_;
+			return _FAILURE_;
 		else
-			return _STRP_SUCCESS_;
+			return _SUCCESS_;
 	else
-		return _STRP_FAILURE_;
+		return _FAILURE_;
 }
 static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const restrict Stream)
 {
 	if(String)
 		if(fputws(String,(Stream)?(Stream):(stdout))<0)
-			return _STRP_FAILURE_;
+			return _FAILURE_;
 		else
-			return _STRP_SUCCESS_;
+			return _SUCCESS_;
 	else
-		return _STRP_FAILURE_;
+		return _FAILURE_;
 }
 #endif
 
@@ -294,27 +273,9 @@ STRPACK StrP=
 	.Version=_StringVersion,
 	.Bool=
 	{
-		.Success=_STRP_SUCCESS_,
-		.Failure=_STRP_FAILURE_
+		.Success=_SUCCESS_,
+		.Failure=_FAILURE_
 	}
 };
 STRPACK *StrP_(void) { return &StrP; }
-#endif
-
-#else
-#error The compiler does not support the C Library Extension 1.
-#endif
-
-#endif
-
-#else
-#error The compiler does not specify the C Standard version number.
-#endif
-
-#else
-#error The compiler does not conform to the C Standard.
-#endif
-
-#else
-#error The compiler does not conform to the C Standard.
 #endif

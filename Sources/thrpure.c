@@ -1,23 +1,5 @@
-﻿#ifdef __STDC__
-
-#if(__STDC__)
-
-#ifdef __STDC_VERSION__
-
-#if(__STDC_VERSION__<201710L)
-#error The compiler does not satisfy the C18 Standard.
-#else
-
-#ifdef __STDC_NO_THREADS__
-#error The compiler does not support the thread library.
-#else
-
-#if(1)
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <threads.h>
-#include <time.h>
+﻿#if(1)
+#include "stdpain.h"
 #include "thrpure.h"
 #endif
 
@@ -55,13 +37,10 @@ _Static_assert(sizeof(thrp_e_)==sizeof(thrp_p_),"sizeof(thrp_e_) != sizeof(thrp_
 _Static_assert(sizeof(int)<=sizeof(time_t),"sizeof(int) > sizeof(time_t)");
 _Static_assert((sizeof(thrp_tp)%sizeof(size_t))==0,"sizeof(thrp_tp)%sizeof(size_t) != 0");
 _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_t) != 0");
-
-#define _THRP_SUCCESS_ ((_Bool)(0))
-#define _THRP_FAILURE_ ((_Bool)(1))
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.07.09";
+static const char _StringVersion[16]="Date:2019.09.19";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -102,12 +81,16 @@ static void _ThrP_Qu_Exit_Once_(void)
 		_LockQu=_MutexEmpty;
 	}
 	else;
+
+	return;
 }
 static void _ThrP_Qu_Exit_(void)
 {
 	static once_flag _FlagExit=ONCE_FLAG_INIT;
 
 	call_once(&_FlagExit,_ThrP_Qu_Exit_Once_);
+
+	return;
 }
 static void _ThrP_Qu_Init_Once_(void)
 {
@@ -120,13 +103,16 @@ static void _ThrP_Qu_Init_Once_(void)
 
 	if(Flag)
 		exit(Flag);
-	else;
+	else
+		return;
 }
 static void _ThrP_Qu_Init_(void)
 {
 	static once_flag _FlagInit=ONCE_FLAG_INIT;
 
 	call_once(&_FlagInit,_ThrP_Qu_Init_Once_);
+
+	return;
 }
 #endif
 
@@ -137,6 +123,8 @@ static void _ThrP_Qu_Reset_(thrp_qu *const restrict Qu)
 	Qu->Pin[1]=Qu->Pin[0]=NULL;
 	Qu->Thread=_ThreadEmpty;
 	memset(Qu+1,0,Qu->Capacity);
+
+	return;
 }
 static int _ThrP_Qu_Join_(thrp_qu *const restrict Qu)
 {
@@ -246,7 +234,7 @@ static int _ThrP_Qu_Stream_(thrp_qu *const Qu)
 		THRP_TP *const Task=Qu->Pin[0];
 		const void *const Arg=(Task->Size)?(Task+1):(NULL);
 
-		if(Task->Proc_(Arg)==_THRP_SUCCESS_)
+		if(Task->Proc_(Arg)==_SUCCESS_)
 			Flag=_ThrP_Qu_Remove_(Qu,&Count);
 		else
 			Flag=thrd_error;
@@ -510,12 +498,16 @@ static void _ThrP_Mu_Exit_Once_(void)
 		_LockMu=_MutexEmpty;
 	}
 	else;
+
+	return;
 }
 static void _ThrP_Mu_Exit_(void)
 {
 	static once_flag _FlagExit=ONCE_FLAG_INIT;
 
 	call_once(&_FlagExit,_ThrP_Mu_Exit_Once_);
+
+	return;
 }
 static void _ThrP_Mu_Init_Once_(void)
 {
@@ -528,13 +520,16 @@ static void _ThrP_Mu_Init_Once_(void)
 
 	if(Flag)
 		exit(Flag);
-	else;
+	else
+		return;
 }
 static void _ThrP_Mu_Init_(void)
 {
 	static once_flag _FlagInit=ONCE_FLAG_INIT;
 
 	call_once(&_FlagInit,_ThrP_Mu_Init_Once_);
+
+	return;
 }
 #endif
 
@@ -718,14 +713,14 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 static _Bool _ThrP_Thread_Sec_(time_t *const restrict Sec,const int Time)
 {
 	if(Time<0)
-		return _THRP_FAILURE_;
+		return _FAILURE_;
 	else
 	{
 		const int Div=1000;
 
 		*Sec=Time/Div;
 
-		return _THRP_SUCCESS_;
+		return _SUCCESS_;
 	}
 }
 static _Bool _ThrP_Thread_Nsec_(long *const restrict Nsec,const int Time)
@@ -739,16 +734,16 @@ static _Bool _ThrP_Thread_Nsec_(long *const restrict Nsec,const int Time)
 	Temp[1]=(*Nsec)/Mul;
 
 	if(Temp[0]==Temp[1])
-		return _THRP_SUCCESS_;
+		return _SUCCESS_;
 	else
-		return _THRP_FAILURE_;
+		return _FAILURE_;
 }
 static _Bool ThrP_Thread_Sleep_(const int *const restrict Time)
 {
 	struct timespec Holder;
 
-	if(_ThrP_Thread_Sec_(&(Holder.tv_sec),*Time)==_THRP_SUCCESS_)
-		if(_ThrP_Thread_Nsec_(&(Holder.tv_nsec),*Time)==_THRP_SUCCESS_)
+	if(_ThrP_Thread_Sec_(&(Holder.tv_sec),*Time)==_SUCCESS_)
+		if(_ThrP_Thread_Nsec_(&(Holder.tv_nsec),*Time)==_SUCCESS_)
 			while(1)
 			{
 				struct timespec Remain;
@@ -756,26 +751,26 @@ static _Bool ThrP_Thread_Sleep_(const int *const restrict Time)
 				switch(thrd_sleep(&Holder,&Remain))
 				{
 				default:
-					return _THRP_FAILURE_;
+					return _FAILURE_;
 				case 0:
-					return _THRP_SUCCESS_;
+					return _SUCCESS_;
 				case-1:
 					if(Remain.tv_sec<0)
-						return _THRP_FAILURE_;
+						return _FAILURE_;
 					else if(Holder.tv_sec<Remain.tv_sec)
-						return _THRP_FAILURE_;
+						return _FAILURE_;
 					else if(Holder.tv_sec>Remain.tv_sec)
 						Holder=Remain;
 					else if(Holder.tv_nsec<Remain.tv_nsec)
-						return _THRP_FAILURE_;
+						return _FAILURE_;
 					else
 						Holder=Remain;
 				}
 			}
 		else
-			return _THRP_FAILURE_;
+			return _FAILURE_;
 	else
-		return _THRP_FAILURE_;
+		return _FAILURE_;
 }
 static _Bool ThrP_Thread_Yield_(const void *const _)
 {
@@ -783,20 +778,20 @@ static _Bool ThrP_Thread_Yield_(const void *const _)
 
 	thrd_yield();
 
-	return _THRP_SUCCESS_;
+	return _SUCCESS_;
 }
 static _Bool ThrP_Thread_Break_(const void *const _)
 {
 	(void)(_);
 
-	return _THRP_FAILURE_;
+	return _FAILURE_;
 }
 static _Bool ThrP_Thread_Print_(const char *const restrict Msg)
 {
 	if(puts(Msg)<0)
-		return _THRP_FAILURE_;
+		return _FAILURE_;
 	else
-		return _THRP_SUCCESS_;
+		return _SUCCESS_;
 }
 #endif
 
@@ -896,25 +891,9 @@ THRPACK ThrP=
 	},
 	.Signal=
 	{
-		.Continue=_THRP_SUCCESS_,
-		.Break=_THRP_FAILURE_
+		.Continue=_SUCCESS_,
+		.Break=_FAILURE_
 	}
 };
 THRPACK *ThrP_(void) { return &ThrP; }
-#endif
-
-#endif
-
-#endif
-
-#else
-#error The compiler does not specify the C Standard version number.
-#endif
-
-#else
-#error The compiler does not conform to the C Standard.
-#endif
-
-#else
-#error The compiler does not conform to the C Standard.
 #endif
