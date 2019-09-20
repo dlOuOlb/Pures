@@ -2,7 +2,7 @@
 /*	StrPure provides some rigid string handling functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.07.10	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.09.19	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_STRPURE
