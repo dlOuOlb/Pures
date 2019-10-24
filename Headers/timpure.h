@@ -2,7 +2,7 @@
 /*	TimPure provides some time representing functions.				*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.09.19	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.10.24	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_TIMPURE
@@ -42,17 +42,15 @@ struct _timpack
 	Obj;
 
 	//TimPure : Textual Representation Functions
+	//＊Required Text size is 26 bytes for the following format:
+	//　Www Mmm dd hh:mm:ss yyyy\n\0
 	//＊Return value is defined under "TimP.Bool".
 	const struct
 	{
 		//TimPure : Convert the given calendar time value to a textual representation.
-		//＊Required Text size is 26 bytes for the following format:
-		//　Www Mmm dd hh:mm:ss yyyy\n\0
 		_Bool(*const Val_)(char Text[26],const time_t TimeValue);
 		//TimPure : Convert the given calendar time object to a textual representation.
-		//＊Required Text size is 26 bytes for the following format:
-		//　Www Mmm dd hh:mm:ss yyyy\n\0
-		_Bool(*const Obj_)(char Text[26],TIMP_TM TimeValue);
+		_Bool(*const Obj_)(char Text[26],TIMP_TM TimeObject);
 	}
 	Text;
 

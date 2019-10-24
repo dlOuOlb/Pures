@@ -2,7 +2,7 @@
 /*	StrPure provides some rigid string handling functions.			*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.09.19	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.10.24	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_STRPURE
@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define _StrP_Define_(type,form,FORM,Nums) struct _strp_##form##_0x##Nums{type FORM[0x##Nums];};typedef struct _strp_##form##_0x##Nums strp_##form##_0x##Nums;typedef const struct _strp_##form##_0x##Nums STRP_##FORM##_0X##Nums;
+#define _StrP_Define_(type,form,FORM,Nums) struct _strp_##form##_0x##Nums{type FORM[0x##Nums];};typedef struct _strp_##form##_0x##Nums strp_##form##_0x##Nums;typedef const struct _strp_##form##_0x##Nums STRP_##FORM##_0X##Nums
 
 _StrP_Define_(char,nc,NC,0010);	//StrPure : strp_nc_0x0010.NC for char [0x0010]
 _StrP_Define_(char,nc,NC,0040);	//StrPure : strp_nc_0x0040.NC for char [0x0040]
@@ -498,6 +498,50 @@ struct _strpack
 	}
 	WC;
 
+	//StrPure : String Conversion Functions
+	//＊Return value is defined under "StrP.Errno".
+	const struct
+	{
+		//StrPure : Convert to char[]
+		const struct
+		{
+			//StrPure : Convert from wchar_t[]
+			const struct
+			{
+				//StrPure : [0x0010]
+				int(*const x0010_)(strp_nc_0x0010 *const restrict Target,STRP_WC_0X0010 *const restrict Source);
+				//StrPure : [0x0040]
+				int(*const x0040_)(strp_nc_0x0040 *const restrict Target,STRP_WC_0X0040 *const restrict Source);
+				//StrPure : [0x0100]
+				int(*const x0100_)(strp_nc_0x0100 *const restrict Target,STRP_WC_0X0100 *const restrict Source);
+				//StrPure : [0x0400]
+				int(*const x0400_)(strp_nc_0x0400 *const restrict Target,STRP_WC_0X0400 *const restrict Source);
+			}
+			WC;
+		}
+		NC;
+
+		//StrPure : Convert to wchar_t[]
+		const struct
+		{
+			//StrPure : Convert from char[]
+			const struct
+			{
+				//StrPure : [0x0010]
+				int(*const x0010_)(strp_wc_0x0010 *const restrict Target,STRP_NC_0X0010 *const restrict Source);
+				//StrPure : [0x0040]
+				int(*const x0040_)(strp_wc_0x0040 *const restrict Target,STRP_NC_0X0040 *const restrict Source);
+				//StrPure : [0x0100]
+				int(*const x0100_)(strp_wc_0x0100 *const restrict Target,STRP_NC_0X0100 *const restrict Source);
+				//StrPure : [0x0400]
+				int(*const x0400_)(strp_wc_0x0400 *const restrict Target,STRP_NC_0X0400 *const restrict Source);
+			}
+			NC;
+		}
+		WC;
+	}
+	Convert;
+
 	//StrPure : Error Numbers
 	const struct
 	{
@@ -507,6 +551,18 @@ struct _strpack
 		const int Range;	//StrPure : Result too large.
 	}
 	Errno;
+
+	//StrPure : Locale Categories
+	const struct
+	{
+		const int All;		//StrPure : Entire C locale.
+		const int Collate;	//StrPure : Collation category.
+		const int CType;	//StrPure : Character classification category.
+		const int Monetary;	//StrPure : Monetary formatting category.
+		const int Numeric;	//StrPure : Numeric formatting category.
+		const int Time;		//StrPure : Time formatting category.
+	}
+	LC;
 
 	//StrPure : Library Version - "Date:yyyy.mm.dd"
 	const char *const Version;
