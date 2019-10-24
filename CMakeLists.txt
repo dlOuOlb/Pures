@@ -6,7 +6,7 @@ set(CONFIG Release)
 set(DIR_INC ./Headers)
 set(DIR_SRC ./Sources)
 set(DIR_USE ./Mains)
-set(OPT_COMPILE /TC /WX /W4 /wd4200 /wd4201 /O2 /Ob2 /Oi /Ot /GL /fp:fast /fp:except-)
+set(OPT_COMPILE /TC /WX /Wall /wd4200 /wd4201 /wd4204 /wd4221 /wd4710 /wd4711 /wd4820 /O2 /Ob2 /Oi /Ot /GL /fp:fast /fp:except-)
 set(OPT_LINK /LTCG)
 
 set(CMAKE_CONFIGURATION_TYPES ${CONFIG})
