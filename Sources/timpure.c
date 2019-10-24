@@ -4,7 +4,7 @@
 #endif
 
 #if(1)
-static const char _StringVersion[16]="2019.09.19";
+static const char _StringVersion[16]="2019.10.24";
 static TIMP_TM _TMInvalid={.tm_sec=-1,.tm_min=-1,.tm_hour=-1,.tm_mday=-1,.tm_mon=-1,.tm_year=-1,.tm_wday=-1,.tm_yday=-1,.tm_isdst=-1};
 #endif
 

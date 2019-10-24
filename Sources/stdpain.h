@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <locale.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>

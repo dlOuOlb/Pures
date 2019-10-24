@@ -4,23 +4,89 @@
 #endif
 
 #if(1)
+_Static_assert(sizeof(errno_t)==sizeof(int),"sizeof(errno_t) != sizeof(int)");
+_Static_assert(sizeof(rsize_t)==sizeof(size_t),"sizeof(rsize_t) != sizeof(size_t)");
+_Static_assert(RSIZE_MAX>(0x0400*sizeof(wchar_t)),"RSIZE_MAX <= (0x0400*sizeof(wchar_t))");
+
 typedef char strp_nc;
 typedef const char STRP_NC;
 
 typedef wchar_t strp_wc;
 typedef const wchar_t STRP_WC;
 
-_Static_assert(CHAR_BIT==8,"CHAR_BIT != 8");
-_Static_assert(sizeof(char)==1,"sizeof(char) != 1");
-_Static_assert(sizeof(errno_t)==sizeof(int),"sizeof(errno_t) != sizeof(int)");
-_Static_assert(sizeof(rsize_t)==sizeof(size_t),"sizeof(rsize_t) != sizeof(size_t)");
-_Static_assert(RSIZE_MAX>(0x0400*sizeof(wchar_t)),"RSIZE_MAX <= (0x0400*sizeof(wchar_t))");
+static const char _StringVersion[16]="2019.10.24";
 
 #include "strpain.c"
 #endif
 
 #if(1)
-static const char _StringVersion[16]="2019.09.19";
+static int _StrP_Convert_(errno_t(*const Convert_)(size_t *const restrict,void *const restrict,const rsize_t,const void **const restrict,const rsize_t,mbstate_t *const restrict),void *const restrict Target,const void *const restrict Source,const size_t Size)
+{
+	size_t Length;
+
+	{
+		const void *Pin=Source;
+		mbstate_t State={0};
+
+		if(Convert_(&Length,NULL,0,&Pin,0,&State))
+			return _FAILURE_;
+		else if(Length<Size)
+			Length++;
+		else
+			return _FAILURE_;
+	}
+	{
+		const void *Pin=Source;
+		mbstate_t State={0};
+
+		if(Convert_(&Length,Target,Size,&Pin,Length,&State))
+			return _FAILURE_;
+		else
+			return _SUCCESS_;
+	}
+}
+
+static errno_t _StrP_Convert_NC_WC_(size_t *const restrict OLength,void *const restrict OString,const rsize_t OSize,const void **const restrict IPin,const rsize_t ILength,mbstate_t *const restrict State)
+{
+	return wcsrtombs_s(OLength,OString,OSize,(const wchar_t**)(IPin),ILength,State);
+}
+static int StrP_NC_WC_0x0010_(strp_nc_0x0010 *const restrict Target,STRP_WC_0X0010 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0010);
+}
+static int StrP_NC_WC_0x0040_(strp_nc_0x0040 *const restrict Target,STRP_WC_0X0040 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0040);
+}
+static int StrP_NC_WC_0x0100_(strp_nc_0x0100 *const restrict Target,STRP_WC_0X0100 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0100);
+}
+static int StrP_NC_WC_0x0400_(strp_nc_0x0400 *const restrict Target,STRP_WC_0X0400 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0400);
+}
+
+static errno_t _StrP_Convert_WC_NC_(size_t *const restrict OLength,void *const restrict OString,const rsize_t OSize,const void **const restrict IPin,const rsize_t ILength,mbstate_t *const restrict State)
+{
+	return mbsrtowcs_s(OLength,OString,OSize,(const char**)(IPin),ILength,State);
+}
+static int StrP_WC_NC_0x0010_(strp_wc_0x0010 *const restrict Target,STRP_NC_0X0010 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0010);
+}
+static int StrP_WC_NC_0x0040_(strp_wc_0x0040 *const restrict Target,STRP_NC_0X0040 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0040);
+}
+static int StrP_WC_NC_0x0100_(strp_wc_0x0100 *const restrict Target,STRP_NC_0X0100 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0100);
+}
+static int StrP_WC_NC_0x0400_(strp_wc_0x0400 *const restrict Target,STRP_NC_0X0400 *const restrict Source)
+{
+	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0400);
+}
 #endif
 
 #if(1)
@@ -263,12 +329,38 @@ STRPACK StrP=
 			.x0400_=StrP_WC_Gets_0x0400_
 		}
 	},
+	.Convert=
+	{
+		.NC.WC=
+		{
+			.x0010_=StrP_NC_WC_0x0010_,
+			.x0040_=StrP_NC_WC_0x0040_,
+			.x0100_=StrP_NC_WC_0x0100_,
+			.x0400_=StrP_NC_WC_0x0400_
+		},
+		.WC.NC=
+		{
+			.x0010_=StrP_WC_NC_0x0010_,
+			.x0040_=StrP_WC_NC_0x0040_,
+			.x0100_=StrP_WC_NC_0x0100_,
+			.x0400_=StrP_WC_NC_0x0400_
+		}
+	},
 	.Errno=
 	{
 		.Zero=0,
 		.Dom=EDOM,
 		.IlSeq=EILSEQ,
 		.Range=ERANGE
+	},
+	.LC=
+	{
+		.All=LC_ALL,
+		.Collate=LC_COLLATE,
+		.CType=LC_CTYPE,
+		.Monetary=LC_MONETARY,
+		.Numeric=LC_NUMERIC,
+		.Time=LC_TIME
 	},
 	.Version=_StringVersion,
 	.Bool=

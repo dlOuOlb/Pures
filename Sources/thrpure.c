@@ -4,6 +4,12 @@
 #endif
 
 #if(1)
+_Static_assert(sizeof(char)==1,"sizeof(char) != 1");
+_Static_assert(sizeof(void*)==sizeof(size_t),"sizeof(void*) != sizeof(size_t)");
+_Static_assert(sizeof(int)<=sizeof(time_t),"sizeof(int) > sizeof(time_t)");
+_Static_assert(INT_MAX>=1000,"INT_MAX < 1000");
+_Static_assert(LONG_MAX>=1000000000,"LONG_MAX < 1000000000");
+
 struct _thrp_tp
 {
 	union
@@ -31,16 +37,13 @@ struct _thrp_mu
 	mtx_t Tex;
 };
 
-_Static_assert(sizeof(char)==1,"sizeof(char) != 1");
-_Static_assert(sizeof(void*)==sizeof(size_t),"sizeof(void*) != sizeof(size_t)");
 _Static_assert(sizeof(thrp_e_)==sizeof(thrp_p_),"sizeof(thrp_e_) != sizeof(thrp_p_)");
-_Static_assert(sizeof(int)<=sizeof(time_t),"sizeof(int) > sizeof(time_t)");
 _Static_assert((sizeof(thrp_tp)%sizeof(size_t))==0,"sizeof(thrp_tp)%sizeof(size_t) != 0");
 _Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_t) != 0");
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.09.19";
+static const char _StringVersion[16]="Date:2019.10.24";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -56,7 +59,7 @@ static int _ThrP_Flag_(const int Flag,const int Temp)
 {
 	return ((Temp==thrd_success)?(Flag):(Temp));
 }
-static size_t _ThrP_Padding_(volatile size_t Value)
+static size_t _ThrP_Padding_(size_t Value)
 {
 	Value--;
 	Value+=sizeof(size_t);
@@ -386,8 +389,8 @@ static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *con
 
 	if(Proc_)
 	{
-		volatile const size_t Size=_ThrP_Padding_(Copy);
-		volatile const size_t Pack=Size+sizeof(thrp_tp);
+		const size_t Size=_ThrP_Padding_(Copy);
+		const size_t Pack=Size+sizeof(thrp_tp);
 
 		if(Size<Copy);
 		else if(Pack<Size);
@@ -417,7 +420,7 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 {
 	_ThrP_Qu_Init_();
 
-	volatile const size_t Size=_ThrP_Padding_(Space);
+	const size_t Size=_ThrP_Padding_(Space);
 
 	if(Size<sizeof(thrp_qu));
 	else if(Size<Space);
@@ -718,7 +721,7 @@ static _Bool _ThrP_Thread_Sec_(time_t *const restrict Sec,const int Time)
 	{
 		const int Div=1000;
 
-		*Sec=Time/Div;
+		*Sec=(time_t)(Time/Div);
 
 		return _SUCCESS_;
 	}
@@ -727,9 +730,9 @@ static _Bool _ThrP_Thread_Nsec_(long *const restrict Nsec,const int Time)
 {
 	const int Mod=1000;
 	const long Mul=1000000;
-	volatile long Temp[2];
+	long Temp[2];
 
-	Temp[0]=Time%Mod;
+	Temp[0]=(long)(Time%Mod);
 	*Nsec=Mul*Temp[0];
 	Temp[1]=(*Nsec)/Mul;
 
@@ -822,8 +825,8 @@ static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const restrict Arg,cons
 {
 	if(Event_)
 	{
-		volatile const size_t Size=_ThrP_Padding_(Copy);
-		volatile const size_t Pack=Size+sizeof(thrp_tp);
+		const size_t Size=_ThrP_Padding_(Copy);
+		const size_t Pack=Size+sizeof(thrp_tp);
 
 		if(Size<Copy);
 		else if(Pack<Size);

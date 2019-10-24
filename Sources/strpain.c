@@ -188,5 +188,5 @@ static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const rest
 #endif
 
 #else
-static void _StrP_Void_(void) { (void)(_StrP_Void_); }
+static void _StrP_Void_(void) { (void)(_StrP_Void_);return; }
 #endif
