@@ -2,3 +2,4 @@ LIBRARY pures.dll
 EXPORTS
 	ThrP_
 	StrP_
+	TimP_
