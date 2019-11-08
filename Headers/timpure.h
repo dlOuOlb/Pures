@@ -2,7 +2,7 @@
 /*	TimPure provides some time representing functions.				*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.10.24	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.11.08	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_TIMPURE
@@ -48,9 +48,9 @@ struct _timpack
 	const struct
 	{
 		//TimPure : Convert the given calendar time value to a textual representation.
-		_Bool(*const Val_)(char Text[26],const time_t TimeValue);
+		_Bool(*const Val_)(char *const Text,const time_t TimeValue);
 		//TimPure : Convert the given calendar time object to a textual representation.
-		_Bool(*const Obj_)(char Text[26],TIMP_TM TimeObject);
+		_Bool(*const Obj_)(char *const Text,TIMP_TM TimeObject);
 	}
 	Text;
 

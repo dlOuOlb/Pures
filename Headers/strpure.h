@@ -1,8 +1,8 @@
 ﻿/*------------------------------------------------------------------*/
-/*	StrPure provides some rigid string handling functions.			*/
+/*	StrPure provides some inflexible string handling functions.		*/
 /*																	*/
 /*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.10.24	*/
+/*	http://github.com/dlOuOlb/Pures/					2019.11.08	*/
 /*------------------------------------------------------------------*/
 
 #ifndef _INC_STRPURE
@@ -24,6 +24,9 @@ _StrP_Define_(wchar_t,wc,WC,0100);	//StrPure : strp_wc_0x0100.WC for wchar_t [0x
 _StrP_Define_(wchar_t,wc,WC,0400);	//StrPure : strp_wc_0x0400.WC for wchar_t [0x0400]
 
 #undef _StrP_Define_
+
+//StrPure : Automatic String Declaration
+#define StrP_Auto_(type,Auto,String) type*const(Auto)=&(type){String}
 
 //StrPure : Library Pack Structure
 struct _strpack
