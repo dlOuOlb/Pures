@@ -1,49 +1,50 @@
-﻿#if(1)
-#include "stdpain.h"
+﻿#include "stdpain.h"
 #include "thrpure.h"
-#endif
 
 #if(1)
 _Static_assert(sizeof(char)==1,"sizeof(char) != 1");
-_Static_assert(sizeof(void*)==sizeof(size_t),"sizeof(void*) != sizeof(size_t)");
-_Static_assert(sizeof(int)<=sizeof(time_t),"sizeof(int) > sizeof(time_t)");
-_Static_assert(INT_MAX>=1000,"INT_MAX < 1000");
-_Static_assert(LONG_MAX>=1000000000,"LONG_MAX < 1000000000");
+_Static_assert(sizeof(void*)==sizeof(uintptr_t),"sizeof(void*) != sizeof(uintptr_t)");
+_Static_assert(sizeof(thrp_e_)==sizeof(thrp_p_),"sizeof(thrp_e_) != sizeof(thrp_p_)");
 
-struct _thrp_tp
+_Static_assert(1000<=INT_MAX,"1000 > INT_MAX");
+_Static_assert(1000000000<=LONG_MAX,"1000000000 > LONG_MAX");
+_Static_assert(sizeof(int)<=sizeof(time_t),"sizeof(int) > sizeof(time_t)");
+_Static_assert(sizeof(size_t)<=sizeof(uintptr_t),"sizeof(size_t) > sizeof(uintptr_t)");
+
+typedef struct
 {
-	union
+	_Alignas(uintptr_t) struct
 	{
-		thrp_e_ Event_;
-		thrp_p_ Proc_;
+		union
+		{
+			thrp_e_ Event_;
+			thrp_p_ Proc_;
+		};
+		size_t Size;
 	};
-	size_t Size;
-};
-typedef struct _thrp_tp thrp_tp;
-typedef const struct _thrp_tp THRP_TP;
+}
+thrp_tp;
+typedef const thrp_tp THRP_TP;
 
 struct _thrp_qu
 {
-	mtx_t Lock;
-	mtx_t Wait;
-	size_t Capacity;
-	size_t Count;
-	thrp_tp *Pin[2];
-	thrd_t Thread;
+	_Alignas(uintptr_t) struct
+	{
+		mtx_t Lock,Wait;
+		size_t Capacity,Count;
+		thrp_tp *Pin[2];
+		thrd_t Thread;
+	};
 };
 
-struct _thrp_mu
-{
-	mtx_t Tex;
-};
+struct _thrp_mu { mtx_t Tex; };
 
-_Static_assert(sizeof(thrp_e_)==sizeof(thrp_p_),"sizeof(thrp_e_) != sizeof(thrp_p_)");
-_Static_assert((sizeof(thrp_tp)%sizeof(size_t))==0,"sizeof(thrp_tp)%sizeof(size_t) != 0");
-_Static_assert((sizeof(thrp_qu)%sizeof(size_t))==0,"sizeof(thrp_qu)%sizeof(size_t) != 0");
+_Static_assert((sizeof(thrp_tp)%sizeof(uintptr_t))==0,"sizeof(thrp_tp)%sizeof(uintptr_t) != 0");
+_Static_assert((sizeof(thrp_qu)%sizeof(uintptr_t))==0,"sizeof(thrp_qu)%sizeof(uintptr_t) != 0");
 #endif
 
 #if(1)
-static const char _StringVersion[16]="Date:2019.10.24";
+static const char _StringVersion[16]="Date:2019.11.08";
 static const thrd_t _ThreadEmpty;
 static const mtx_t _MutexEmpty;
 
@@ -55,23 +56,20 @@ static mtx_t *const LockMu=&_LockMu;
 #endif
 
 #if(1)
-static int _ThrP_Flag_(const int Flag,const int Temp)
-{
-	return ((Temp==thrd_success)?(Flag):(Temp));
-}
+static int _ThrP_Flag_(const int Flag,const int Temp) { return ((Temp==thrd_success)?(Flag):(Temp)); }
 static size_t _ThrP_Padding_(size_t Value)
 {
+	const size_t Align=sizeof(uintptr_t);
+
 	Value--;
-	Value+=sizeof(size_t);
-	Value/=sizeof(size_t);
-	Value*=sizeof(size_t);
+	Value+=Align;
+	Value/=Align;
+	Value*=Align;
 
 	return Value;
 }
-static int _ThrP_Exist_Thread_(const thrd_t Thread)
-{
-	return memcmp(&Thread,&_ThreadEmpty,sizeof(thrd_t));
-}
+static void *_ThrP_Malloc_(const size_t Size) { return aligned_alloc(sizeof(uintptr_t),Size); }
+static int _ThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&_ThreadEmpty,sizeof(thrd_t)); }
 #endif
 
 #if(1)
@@ -165,17 +163,17 @@ static void *_ThrP_Qu_Capable_(thrp_qu *const Qu,const size_t Pack)
 	if(Qu->Count)
 	{
 		thrp_tp *const *const Pin=Qu->Pin;
-		char *const Ptr=((char*)(Pin[1]+1))+(Pin[1]->Size);
+		char *const Foo=(char*)(Pin[0]),*const Bar=(char*)(Pin[1]+1),*const Ptr=Bar+(Pin[1]->Size),*const Bnd=Ptr+Pack;
 
 		if(Pin[0]>Pin[1])
-			if((Ptr+Pack)>((char*)(Pin[0])))
+			if(Bnd>Foo)
 				return NULL;
 			else
 				return Ptr;
 		else
-			if((Ptr+Pack)>(Front+(Qu->Capacity)))
-				if(Front<(char*)(Pin[0]))
-					if((Front+Pack)>(char*)(Pin[0]))
+			if(Bnd>(Front+(Qu->Capacity)))
+				if(Front<Foo)
+					if((Front+Pack)>Foo)
 						return NULL;
 					else
 						return Front;
@@ -429,7 +427,7 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 			goto UNLOCK;
 		else
 		{
-			thrp_qu *const Qu=malloc(Size);
+			thrp_qu *const Qu=_ThrP_Malloc_(Size);
 
 			if(Qu)
 				if(mtx_init(&(Qu->Lock),mtx_plain)==thrd_success)
@@ -645,7 +643,7 @@ static int ThrP_Mu_Create_(thrp_mu **const Ptr)
 			goto UNLOCK;
 		else
 		{
-			thrp_mu *const Mu=malloc(sizeof(thrp_mu));
+			thrp_mu *const Mu=_ThrP_Malloc_(sizeof(thrp_mu));
 
 			if(Mu)
 				if(mtx_init(&(Mu->Tex),mtx_plain)==thrd_success)
@@ -832,7 +830,7 @@ static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const restrict Arg,cons
 		else if(Pack<Size);
 		else
 		{
-			thrp_tp *const Hold=malloc(Pack);
+			thrp_tp *const Hold=_ThrP_Malloc_(Pack);
 
 			if(Hold)
 			{

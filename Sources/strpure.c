@@ -1,12 +1,10 @@
-﻿#if(1)
-#include "stdpain.h"
+﻿#include "stdpain.h"
 #include "strpure.h"
-#endif
 
 #if(1)
 _Static_assert(sizeof(errno_t)==sizeof(int),"sizeof(errno_t) != sizeof(int)");
 _Static_assert(sizeof(rsize_t)==sizeof(size_t),"sizeof(rsize_t) != sizeof(size_t)");
-_Static_assert(RSIZE_MAX>(0x0400*sizeof(wchar_t)),"RSIZE_MAX <= (0x0400*sizeof(wchar_t))");
+_Static_assert(sizeof(strp_wc_0x0400)<=RSIZE_MAX,"sizeof(strp_wc_0x0400) > RSIZE_MAX");
 
 typedef char strp_nc;
 typedef const char STRP_NC;
@@ -14,7 +12,7 @@ typedef const char STRP_NC;
 typedef wchar_t strp_wc;
 typedef const wchar_t STRP_WC;
 
-static const char _StringVersion[16]="2019.10.24";
+static const char _StringVersion[16]="2019.11.08";
 
 #include "strpain.c"
 #endif
@@ -46,47 +44,17 @@ static int _StrP_Convert_(errno_t(*const Convert_)(size_t *const restrict,void *
 	}
 }
 
-static errno_t _StrP_Convert_NC_WC_(size_t *const restrict OLength,void *const restrict OString,const rsize_t OSize,const void **const restrict IPin,const rsize_t ILength,mbstate_t *const restrict State)
-{
-	return wcsrtombs_s(OLength,OString,OSize,(const wchar_t**)(IPin),ILength,State);
-}
-static int StrP_NC_WC_0x0010_(strp_nc_0x0010 *const restrict Target,STRP_WC_0X0010 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0010);
-}
-static int StrP_NC_WC_0x0040_(strp_nc_0x0040 *const restrict Target,STRP_WC_0X0040 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0040);
-}
-static int StrP_NC_WC_0x0100_(strp_nc_0x0100 *const restrict Target,STRP_WC_0X0100 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0100);
-}
-static int StrP_NC_WC_0x0400_(strp_nc_0x0400 *const restrict Target,STRP_WC_0X0400 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0400);
-}
+static errno_t _StrP_Convert_NC_WC_(size_t *const restrict OLength,void *const restrict OString,const rsize_t OSize,const void **const restrict IPin,const rsize_t ILength,mbstate_t *const restrict State) { return wcsrtombs_s(OLength,OString,OSize,(const wchar_t**)(IPin),ILength,State); }
+static int StrP_NC_WC_0x0010_(strp_nc_0x0010 *const restrict Target,STRP_WC_0X0010 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0010); }
+static int StrP_NC_WC_0x0040_(strp_nc_0x0040 *const restrict Target,STRP_WC_0X0040 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0040); }
+static int StrP_NC_WC_0x0100_(strp_nc_0x0100 *const restrict Target,STRP_WC_0X0100 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0100); }
+static int StrP_NC_WC_0x0400_(strp_nc_0x0400 *const restrict Target,STRP_WC_0X0400 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_NC_WC_,Target,Source,0x0400); }
 
-static errno_t _StrP_Convert_WC_NC_(size_t *const restrict OLength,void *const restrict OString,const rsize_t OSize,const void **const restrict IPin,const rsize_t ILength,mbstate_t *const restrict State)
-{
-	return mbsrtowcs_s(OLength,OString,OSize,(const char**)(IPin),ILength,State);
-}
-static int StrP_WC_NC_0x0010_(strp_wc_0x0010 *const restrict Target,STRP_NC_0X0010 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0010);
-}
-static int StrP_WC_NC_0x0040_(strp_wc_0x0040 *const restrict Target,STRP_NC_0X0040 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0040);
-}
-static int StrP_WC_NC_0x0100_(strp_wc_0x0100 *const restrict Target,STRP_NC_0X0100 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0100);
-}
-static int StrP_WC_NC_0x0400_(strp_wc_0x0400 *const restrict Target,STRP_NC_0X0400 *const restrict Source)
-{
-	return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0400);
-}
+static errno_t _StrP_Convert_WC_NC_(size_t *const restrict OLength,void *const restrict OString,const rsize_t OSize,const void **const restrict IPin,const rsize_t ILength,mbstate_t *const restrict State) { return mbsrtowcs_s(OLength,OString,OSize,(const char**)(IPin),ILength,State); }
+static int StrP_WC_NC_0x0010_(strp_wc_0x0010 *const restrict Target,STRP_NC_0X0010 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0010); }
+static int StrP_WC_NC_0x0040_(strp_wc_0x0040 *const restrict Target,STRP_NC_0X0040 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0040); }
+static int StrP_WC_NC_0x0100_(strp_wc_0x0100 *const restrict Target,STRP_NC_0X0100 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0100); }
+static int StrP_WC_NC_0x0400_(strp_wc_0x0400 *const restrict Target,STRP_NC_0X0400 *const restrict Source) { return _StrP_Convert_(_StrP_Convert_WC_NC_,Target,Source,0x0400); }
 #endif
 
 #if(1)

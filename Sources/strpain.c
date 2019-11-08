@@ -1,10 +1,7 @@
 ﻿#ifdef _INC_STRPURE
 #ifdef _SRC_STRPAIN
 
-static size_t Func_(TT,Length,XXXX)(TT_XXXX *const String)
-{
-	return _StrP_Length_(String->TT,OxXXXX);
-}
+static size_t Func_(TT,Length,XXXX)(TT_XXXX *const String) { return _StrP_Length_(String->TT,OxXXXX); }
 static size_t Func_(TT,Find,XXXX)(TT_XXXX *const String,TT_UNIT Character,const _Bool Mode)
 {
 	TT_UNIT *const Where=(Mode)?(_StrP_Find_Forward_(String->TT,Character)):(_StrP_Find_Reverse_(String->TT,Character));
@@ -17,19 +14,10 @@ static size_t Func_(TT,Search,XXXX)(TT_XXXX *const String,TT_XXXX *const SubStri
 
 	return ((Where)?(Where-(String->TT)):(OxXXXX));
 }
-static int Func_(TT,Reset,XXXX)(tt_xxxx *const restrict String)
-{
-	return memset_s(String->TT,sizeof(tt_xxxx),0,sizeof(tt_xxxx));
-}
+static int Func_(TT,Reset,XXXX)(tt_xxxx *const restrict String) { return memset_s(String->TT,sizeof(tt_xxxx),0,sizeof(tt_xxxx)); }
 
-static int Func_(TT,Copy,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source)
-{
-	return _StrP_Copy_(Target->TT,OxXXXX,Source->TT);
-}
-static int Func_(TT,Conc,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source)
-{
-	return _StrP_Conc_(Target->TT,OxXXXX,Source->TT);
-}
+static int Func_(TT,Copy,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source) { return _StrP_Copy_(Target->TT,OxXXXX,Source->TT); }
+static int Func_(TT,Conc,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source) { return _StrP_Conc_(Target->TT,OxXXXX,Source->TT); }
 static int Func_(TT,Crop,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source,const size_t Offset,const size_t Length)
 {
 	const size_t Limit=_StrP_Length_(Source->TT,OxXXXX);
@@ -51,10 +39,7 @@ static int Func_(TT,Crop,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const res
 	
 	return ERANGE;
 }
-static int Func_(TT,Comp,XXXX)(TT_XXXX *const Left,TT_XXXX *const Right)
-{
-	return _StrP_Comp_(Left->TT,Right->TT,OxXXXX);
-}
+static int Func_(TT,Comp,XXXX)(TT_XXXX *const Left,TT_XXXX *const Right) { return _StrP_Comp_(Left->TT,Right->TT,OxXXXX); }
 static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const restrict Source)
 {
 	const size_t Limit=OxXXXX-0x0001;
