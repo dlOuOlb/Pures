@@ -18,8 +18,8 @@ static _Alignas(void*) const struct { const thrd_t Thread;const mtx_t Mutex; }Em
 
 static _Alignas(sizeof(void*)<<1) struct { mtx_t *const Qu,*const Mu; }GLock={.Qu=&(mtx_t) { 0 },.Mu=&(mtx_t) { 0 }};
 
-static int _ThrP_Flag_(const int Flag,const int Temp) { return ((Temp==thrd_success)?(Flag):(Temp)); }
-static size_t _ThrP_Padding_(size_t V) { const size_t T=sizeof(void*);V--;V+=T;V/=T;V*=T;return V; }
+static int _ThrP_Flag_(register const int Flag,register const int Temp) { return ((Temp==thrd_success)?(Flag):(Temp)); }
+static size_t _ThrP_Padding_(register size_t V) { const size_t T=sizeof(void*);V--;V+=T;V/=T;V*=T;return V; }
 static void *_ThrP_Malloc_(const size_t Size) { return aligned_alloc(sizeof(void*),Size); }
 static int _ThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&(Empty.Thread),sizeof(thrd_t)); }
 #endif
@@ -581,7 +581,7 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 #endif
 
 #if(1)
-static struct timespec _ThrP_Thread_Time_(const int T) { const long M=1000000L;const int K=1000;return (struct timespec) { .tv_sec=(time_t)(T/K),.tv_nsec=M*(long)(T%K) }; }
+static struct timespec _ThrP_Thread_Time_(register const int T) { const long M=1000000L;const int K=1000;return (struct timespec) { .tv_sec=(time_t)(T/K),.tv_nsec=M*(long)(T%K) }; }
 static _Bool ThrP_Thread_Sleep_(const int *const restrict Time)
 {
 	if((*Time)<0)
@@ -623,7 +623,7 @@ static int _ThrP_Event_Thread_(thrp_tp *const Task)
 static int _ThrP_Event_Launch_(thrp_tp *const Task)
 {
 	thrd_t Thread;
-	int Flag=thrd_create(&Thread,(thrd_start_t)_ThrP_Event_Thread_,Task);
+	int Flag=thrd_create(&Thread,(thrd_start_t)(_ThrP_Event_Thread_),Task);
 
 	if(Flag==thrd_success)
 		Flag=thrd_detach(Thread);
@@ -667,7 +667,7 @@ static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const restrict Arg,cons
 #endif
 
 #if(1)
-THRPACK ThrP=
+extern THRPACK ThrP=
 {
 	.Qu=
 	{
@@ -709,5 +709,5 @@ THRPACK ThrP=
 		.Break=_FAILURE_
 	}
 };
-THRPACK *ThrP_(void) { return &ThrP; }
+extern THRPACK *ThrP_(void) { return &ThrP; }
 #endif

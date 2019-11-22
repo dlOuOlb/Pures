@@ -37,7 +37,7 @@ _Static_assert(sizeof(void*)==sizeof(uintptr_t),"sizeof(void*) != sizeof(uintptr
 _Static_assert(((void*)(NULL))==((void*)((uintptr_t)(0))),"NULL != 0");
 _Static_assert(((uintptr_t)(0))==((uintptr_t)((void*)(NULL))),"0 != NULL");
 
-static _Bool _StdP_Fine_Zero_(unsigned int E)
+static _Bool _StdP_Fine_Zero_(register unsigned int E)
 {
 	(void)(_StdP_Fine_Zero_);
 	const unsigned int S=(sizeof(int)*CHAR_BIT)-1;
@@ -48,7 +48,7 @@ static _Bool _StdP_Fine_Zero_(unsigned int E)
 
 	return T[E];
 }
-static _Bool _StdP_Fine_MSB0_(unsigned int E)
+static _Bool _StdP_Fine_MSB0_(register unsigned int E)
 {
 	(void)(_StdP_Fine_MSB0_);
 	const unsigned int S=(sizeof(int)*CHAR_BIT)-1;
@@ -64,7 +64,7 @@ static _Bool _StdP_Fine_Some_(const void *const P)
 	const uintptr_t S=(sizeof(void*)*CHAR_BIT)-1;
 	const _Bool T[2]={[0]=_FAILURE_,[1]=_SUCCESS_};
 
-	uintptr_t E=(const union { const void *const P;const uintptr_t V; }) { .P=P }.V;
+	register uintptr_t E=(uintptr_t)(P);
 
 	E|=0-E;
 	E>>=S;

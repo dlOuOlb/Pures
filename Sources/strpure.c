@@ -79,7 +79,7 @@ static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const rest
 #endif
 
 #if(1)
-STRPACK StrP=
+extern STRPACK StrP=
 {
 	.NC=
 	{
@@ -335,5 +335,5 @@ STRPACK StrP=
 		.Failure=_FAILURE_
 	}
 };
-STRPACK *StrP_(void) { return &StrP; }
+extern STRPACK *StrP_(void) { return &StrP; }
 #endif

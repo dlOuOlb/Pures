@@ -28,7 +28,7 @@ static _Bool TimP_TM_Textual_(char *const Text,const struct tm Time) { return _S
 #endif
 
 #if(1)
-TIMPACK TimP=
+extern TIMPACK TimP=
 {
 	.Version=_StringVersion,
 	.Bool=
@@ -52,5 +52,5 @@ TIMPACK TimP=
 		.Obj_=TimP_TM_Textual_
 	}
 };
-TIMPACK *TimP_(void) { return &TimP; }
+extern TIMPACK *TimP_(void) { return &TimP; }
 #endif
