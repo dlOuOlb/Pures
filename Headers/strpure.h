@@ -1,12 +1,11 @@
-﻿/*------------------------------------------------------------------*/
+﻿#ifndef _INC_STRPURE
+#define _INC_STRPURE "Date:2019.11.22"
+/*------------------------------------------------------------------*/
 /*	StrPure provides some inflexible string handling functions.		*/
 /*																	*/
-/*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.11.08	*/
+/*	Written by Ranny Clover											*/
+/*	http://github.com/dlOuOlb/Pures/								*/
 /*------------------------------------------------------------------*/
-
-#ifndef _INC_STRPURE
-#define _INC_STRPURE
 
 #include <stddef.h>
 #include <stdio.h>
@@ -28,8 +27,7 @@ _StrP_Define_(wchar_t,wc,WC,0400);	//StrPure : strp_wc_0x0400.WC for wchar_t [0x
 //StrPure : Automatic String Declaration
 #define StrP_Auto_(type,Auto,String) type*const(Auto)=&(type){String}
 
-//StrPure : Library Pack Structure
-struct _strpack
+typedef const struct
 {
 	//StrPure : Null-terminated Native Narrow Character String Functions
 	//＊(strp_nc_0x#### *)'s capacity must not be smaller than char[0x####].
@@ -577,9 +575,8 @@ struct _strpack
 		const _Bool Failure;	//StrPure : Something wrong.
 	}
 	Bool;
-};
-typedef struct _strpack strpack;		//StrPure : Library Pack Variable (Prohibited)
-typedef const struct _strpack STRPACK;	//StrPure : Library Pack Constant
+}
+STRPACK;	//StrPure : Library Pack Structure
 
 //StrPure : Library Pack Object
 extern STRPACK StrP;

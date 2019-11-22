@@ -1,20 +1,15 @@
-﻿/*------------------------------------------------------------------*/
+﻿#ifndef _INC_TIMPURE
+#define _INC_TIMPURE "Date:2019.11.22"
+/*------------------------------------------------------------------*/
 /*	TimPure provides some time representing functions.				*/
 /*																	*/
-/*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.11.08	*/
+/*	Written by Ranny Clover											*/
+/*	http://github.com/dlOuOlb/Pures/								*/
 /*------------------------------------------------------------------*/
-
-#ifndef _INC_TIMPURE
-#define _INC_TIMPURE
 
 #include <time.h>
 
-typedef struct tm timp_tm;			//TimPure : Calendar Time Variable
-typedef const struct tm TIMP_TM;	//TimPure : Calendar Time Constant
-
-//TimPure : Library Pack Structure
-struct _timpack
+typedef const struct
 {
 	//TimPure : Calendar Time Value Functions
 	const struct
@@ -22,22 +17,20 @@ struct _timpack
 		//TimPure : Get the current calendar time value.
 		//＊It might be the number of seconds since 1970.01.01 00:00:00.
 		time_t(*const Now_)(void);
-		//TimPure : Cast from timp_tm to time_t
-		time_t(*const Obj_)(TIMP_TM TimeObject);
+		//TimPure : Convert from struct tm to time_t.
+		time_t(*const Obj_)(const struct tm TimeObject);
 	}
 	Val;
 
 	//TimPure : Calendar Time Object Functions
+	//＊Mode 0 : Coordinated Universal Time (UTC)
+	//　Mode 1 : Local Time
 	const struct
 	{
 		//TimPure : Get the current calendar time object.
-		//＊Mode 0 : Coordinated Universal Time (UTC)
-		//　Mode 1 : Local Time
-		timp_tm(*const Now_)(const _Bool Mode);
-		//TimPure : Cast from time_t to timp_tm
-		//＊Mode 0 : Coordinated Universal Time (UTC)
-		//　Mode 1 : Local Time
-		timp_tm(*const Val_)(const time_t TimeValue,const _Bool Mode);
+		struct tm(*const Now_)(const _Bool Mode);
+		//TimPure : Convert from time_t to struct tm.
+		struct tm(*const Val_)(const time_t TimeValue,const _Bool Mode);
 	}
 	Obj;
 
@@ -50,7 +43,7 @@ struct _timpack
 		//TimPure : Convert the given calendar time value to a textual representation.
 		_Bool(*const Val_)(char *const Text,const time_t TimeValue);
 		//TimPure : Convert the given calendar time object to a textual representation.
-		_Bool(*const Obj_)(char *const Text,TIMP_TM TimeObject);
+		_Bool(*const Obj_)(char *const Text,const struct tm TimeObject);
 	}
 	Text;
 
@@ -64,9 +57,8 @@ struct _timpack
 		const _Bool Failure;	//TimPure : Something wrong.
 	}
 	Bool;
-};
-typedef struct _timpack timpack;		//TimPure : Library Pack Variable (Prohibited)
-typedef const struct _timpack TIMPACK;	//TimPure : Library Pack Constant
+}
+TIMPACK;	//TimPure : Library Pack Structure
 
 //TimPure : Library Pack Object
 extern TIMPACK TimP;

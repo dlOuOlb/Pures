@@ -1,12 +1,11 @@
-﻿/*------------------------------------------------------------------*/
+﻿#ifndef _INC_THRPURE
+#define _INC_THRPURE "Date:2019.11.22"
+/*------------------------------------------------------------------*/
 /*	ThrPure provides some simple thread managing functions.			*/
 /*																	*/
-/*	Written by Ranny Clover								Date		*/
-/*	http://github.com/dlOuOlb/Pures/					2019.11.08	*/
+/*	Written by Ranny Clover											*/
+/*	http://github.com/dlOuOlb/Pures/								*/
 /*------------------------------------------------------------------*/
-
-#ifndef _INC_THRPURE
-#define _INC_THRPURE
 
 #include <stddef.h>
 
@@ -22,8 +21,7 @@ typedef const struct _thrp_qu THRP_QU;	//ThrPure : Task Queue Constant
 typedef struct _thrp_mu thrp_mu;		//ThrPure : Mutex Variable
 typedef const struct _thrp_mu THRP_MU;	//ThrPure : Mutex Constant
 
-//ThrPure : Library Pack Structure
-struct _thrpack
+typedef const struct
 {
 	//ThrPure : Task Queue Functions
 	//＊This function set has its global mutex internally.
@@ -136,9 +134,8 @@ struct _thrpack
 		const _Bool Break;		//ThrPure : Break the task queue. (Failure)
 	}
 	Signal;
-};
-typedef struct _thrpack thrpack;		//ThrPure : Library Pack Variable (Prohibited)
-typedef const struct _thrpack THRPACK;	//ThrPure : Library Pack Constant
+}
+THRPACK;	//ThrPure : Library Pack Structure
 
 //ThrPure : Library Pack Object
 extern THRPACK ThrP;
