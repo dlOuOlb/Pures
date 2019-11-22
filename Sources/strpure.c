@@ -2,17 +2,24 @@
 #include "strpure.h"
 
 #if(1)
-_Static_assert(sizeof(errno_t)==sizeof(int),"sizeof(errno_t) != sizeof(int)");
-_Static_assert(sizeof(rsize_t)==sizeof(size_t),"sizeof(rsize_t) != sizeof(size_t)");
-_Static_assert(sizeof(strp_wc_0x0400)<=RSIZE_MAX,"sizeof(strp_wc_0x0400) > RSIZE_MAX");
-
 typedef char strp_nc;
 typedef const char STRP_NC;
 
 typedef wchar_t strp_wc;
 typedef const wchar_t STRP_WC;
+#endif
 
-static const char _StringVersion[16]="2019.11.08";
+#if(1)
+static _Alignas(16) const char _StringVersion[16]=_INC_STRPURE;
+
+static char *_StrP_NC_Find_Forward_(const char *const String,const char Character) { return strchr(String,Character); }
+static char *_StrP_NC_Find_Reverse_(const char *const String,const char Character) { return strrchr(String,Character); }
+
+static int _StrP_NC_Puts_Fail_(const char *const restrict String,FILE *const restrict Stream) { (void)(String);(void)(Stream);return -1; }
+static int _StrP_WC_Puts_Fail_(const wchar_t *const restrict String,FILE *const restrict Stream) { (void)(String);(void)(Stream);return -1; }
+
+static char *_StrP_NC_Gets_Fail_(char *const restrict String,const int Count,FILE *const restrict Stream) { (void)(String);(void)(Count);(void)(Stream);return NULL; }
+static wchar_t *_StrP_WC_Gets_Fail_(wchar_t *const restrict String,const int Count,FILE *const restrict Stream) { (void)(String);(void)(Count);(void)(Stream);return NULL; }
 
 #include "strpain.c"
 #endif
@@ -37,10 +44,7 @@ static int _StrP_Convert_(errno_t(*const Convert_)(size_t *const restrict,void *
 		const void *Pin=Source;
 		mbstate_t State={0};
 
-		if(Convert_(&Length,Target,Size,&Pin,Length,&State))
-			return _FAILURE_;
-		else
-			return _SUCCESS_;
+		return _StdP_Fine_Zero_(Convert_(&Length,Target,Size,&Pin,Length,&State));
 	}
 }
 
@@ -60,23 +64,17 @@ static int StrP_WC_NC_0x0400_(strp_wc_0x0400 *const restrict Target,STRP_NC_0X04
 #if(1)
 static _Bool StrP_NC_Puts_(const char *const restrict String,FILE *const restrict Stream)
 {
-	if(String)
-		if(fputs(String,(Stream)?(Stream):(stdout))<0)
-			return _FAILURE_;
-		else
-			return _SUCCESS_;
-	else
-		return _FAILURE_;
+	int(*const Puts_[2])(const char *const restrict,FILE *const restrict)={[_SUCCESS_]=fputs,[_FAILURE_]=_StrP_NC_Puts_Fail_};
+	FILE *const Port[2]={[_SUCCESS_]=Stream,[_FAILURE_]=stdout};
+	
+	return _StdP_Fine_MSB0_(Puts_[_StdP_Fine_Some_(String)](String,Port[_StdP_Fine_Some_(Stream)]));
 }
 static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const restrict Stream)
 {
-	if(String)
-		if(fputws(String,(Stream)?(Stream):(stdout))<0)
-			return _FAILURE_;
-		else
-			return _SUCCESS_;
-	else
-		return _FAILURE_;
+	int(*const Puts_[2])(const wchar_t *const restrict,FILE *const restrict)={[_SUCCESS_]=fputws,[_FAILURE_]=_StrP_WC_Puts_Fail_};
+	FILE *const Port[2]={[_SUCCESS_]=Stream,[_FAILURE_]=stdout};
+
+	return _StdP_Fine_MSB0_(Puts_[_StdP_Fine_Some_(String)](String,Port[_StdP_Fine_Some_(Stream)]));
 }
 #endif
 

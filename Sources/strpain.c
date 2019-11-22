@@ -4,15 +4,18 @@
 static size_t Func_(TT,Length,XXXX)(TT_XXXX *const String) { return _StrP_Length_(String->TT,OxXXXX); }
 static size_t Func_(TT,Find,XXXX)(TT_XXXX *const String,TT_UNIT Character,const _Bool Mode)
 {
-	TT_UNIT *const Where=(Mode)?(_StrP_Find_Forward_(String->TT,Character)):(_StrP_Find_Reverse_(String->TT,Character));
+	tt_unit*(*const Find_[2])(TT_UNIT *const,TT_UNIT)={[0]=_StrP_Find_Reverse_,[1]=_StrP_Find_Forward_};
+	TT_UNIT *const Where=Find_[Mode&1](String->TT,Character);
+	const size_t Table[2]={[_SUCCESS_]=Where-(String->TT),[_FAILURE_]=OxXXXX};
 
-	return ((Where)?(Where-(String->TT)):(OxXXXX));
+	return Table[_StdP_Fine_Some_(Where)];
 }
 static size_t Func_(TT,Search,XXXX)(TT_XXXX *const String,TT_XXXX *const SubString)
 {
 	TT_UNIT *const Where=_StrP_Search_(String->TT,SubString->TT);
+	const size_t Table[2]={[_SUCCESS_]=Where-(String->TT),[_FAILURE_]=OxXXXX};
 
-	return ((Where)?(Where-(String->TT)):(OxXXXX));
+	return Table[_StdP_Fine_Some_(Where)];
 }
 static int Func_(TT,Reset,XXXX)(tt_xxxx *const restrict String) { return memset_s(String->TT,sizeof(tt_xxxx),0,sizeof(tt_xxxx)); }
 
@@ -24,7 +27,7 @@ static int Func_(TT,Crop,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const res
 
 	if(Limit<OxXXXX)
 	{
-		volatile const size_t There=Offset+Length;
+		const size_t There=Offset+Length;
 
 		if(Offset>There);
 		else if(There>Limit);
@@ -40,22 +43,14 @@ static int Func_(TT,Crop,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const res
 	return ERANGE;
 }
 static int Func_(TT,Comp,XXXX)(TT_XXXX *const Left,TT_XXXX *const Right) { return _StrP_Comp_(Left->TT,Right->TT,OxXXXX); }
-static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const restrict Source)
-{
-	const size_t Limit=OxXXXX-0x0001;
-
-	return _StrP_Cast_(Target,OxXXXX,Source,Limit);
-}
+static int Func_(TT,Cast,XXXX)(void *const restrict Target,const void *const restrict Source) { return _StrP_Cast_(Target,OxXXXX,Source,OxXXXX-0x0001); }
 
 static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const restrict Stream)
 {
-	if(String)
-		if(_StrP_Gets_(String->TT,OxXXXX,(Stream)?(Stream):(stdin))==(String->TT))
-			return _SUCCESS_;
-		else
-			return _FAILURE_;
-	else
-		return _FAILURE_;
+	tt_unit*(*const Gets_[2])(tt_unit *const restrict,const int,FILE *const restrict)={[_SUCCESS_]=_StrP_Gets_,[_FAILURE_]=_StrP_Gets_Fail_};
+	FILE *const Port[2]={[_SUCCESS_]=Stream,[_FAILURE_]=stdin};
+
+	return _StdP_Fine_Some_(Gets_[_StdP_Fine_Some_(String)](String->TT,OxXXXX,Port[_StdP_Fine_Some_(Stream)]));
 }
 
 #else
@@ -82,14 +77,15 @@ static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const rest
 #define tt nc
 #define TT NC
 #define _StrP_Length_ strnlen_s
-#define _StrP_Find_Forward_ strchr
-#define _StrP_Find_Reverse_ strrchr
+#define _StrP_Find_Forward_ _StrP_NC_Find_Forward_
+#define _StrP_Find_Reverse_ _StrP_NC_Find_Reverse_
 #define _StrP_Search_ strstr
 #define _StrP_Copy_ strcpy_s
 #define _StrP_Conc_ strcat_s
 #define _StrP_Comp_ strncmp
 #define _StrP_Cast_ strncpy_s
 #define _StrP_Gets_ fgets
+#define _StrP_Gets_Fail_ _StrP_NC_Gets_Fail_
 
 #define XXXX 0010
 #include "strpain.c"
@@ -104,6 +100,7 @@ static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const rest
 #include "strpain.c"
 #undef XXXX
 
+#undef _StrP_Gets_Fail_
 #undef _StrP_Gets_
 #undef _StrP_Cast_
 #undef _StrP_Comp_
@@ -129,6 +126,7 @@ static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const rest
 #define _StrP_Comp_ wcsncmp
 #define _StrP_Cast_ wcsncpy_s
 #define _StrP_Gets_ fgetws
+#define _StrP_Gets_Fail_ _StrP_WC_Gets_Fail_
 
 #define XXXX 0010
 #include "strpain.c"
@@ -143,6 +141,7 @@ static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const rest
 #include "strpain.c"
 #undef XXXX
 
+#undef _StrP_Gets_Fail_
 #undef _StrP_Gets_
 #undef _StrP_Cast_
 #undef _StrP_Comp_
