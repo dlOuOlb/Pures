@@ -1,0 +1,8 @@
+LIBRARY pures.dll
+EXPORTS
+	StrP_
+	StrP DATA
+	ThrP_
+	ThrP DATA
+	TimP_
+	TimP DATA
