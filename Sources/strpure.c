@@ -10,16 +10,8 @@ typedef const wchar_t STRP_WC;
 #endif
 
 #if(1)
-static _Alignas(16) const char _StringVersion[16]=_INC_STRPURE;
-
 static char *_StrP_NC_Find_Forward_(const char *const String,const char Character) { return strchr(String,Character); }
 static char *_StrP_NC_Find_Reverse_(const char *const String,const char Character) { return strrchr(String,Character); }
-
-static int _StrP_NC_Puts_Fail_(const char *const restrict String,FILE *const restrict Stream) { (void)(String);(void)(Stream);return -1; }
-static int _StrP_WC_Puts_Fail_(const wchar_t *const restrict String,FILE *const restrict Stream) { (void)(String);(void)(Stream);return -1; }
-
-static char *_StrP_NC_Gets_Fail_(char *const restrict String,const int Count,FILE *const restrict Stream) { (void)(String);(void)(Count);(void)(Stream);return NULL; }
-static wchar_t *_StrP_WC_Gets_Fail_(wchar_t *const restrict String,const int Count,FILE *const restrict Stream) { (void)(String);(void)(Count);(void)(Stream);return NULL; }
 
 #include "strpain.c"
 #endif
@@ -44,7 +36,7 @@ static int _StrP_Convert_(errno_t(*const Convert_)(size_t *const restrict,void *
 		const void *Pin=Source;
 		mbstate_t State={0};
 
-		return _StdP_Fine_Zero_(Convert_(&Length,Target,Size,&Pin,Length,&State));
+		return Convert_(&Length,Target,Size,&Pin,Length,&State);
 	}
 }
 
@@ -64,25 +56,61 @@ static int StrP_WC_NC_0x0400_(strp_wc_0x0400 *const restrict Target,STRP_NC_0X04
 #if(1)
 static _Bool StrP_NC_Puts_(const char *const restrict String,FILE *const restrict Stream)
 {
-	int(*const Puts_[2])(const char *const restrict,FILE *const restrict)={[_SUCCESS_]=fputs,[_FAILURE_]=_StrP_NC_Puts_Fail_};
-	FILE *const Port[2]={[_SUCCESS_]=Stream,[_FAILURE_]=stdout};
-	
-	return _StdP_Fine_MSB0_(Puts_[_StdP_Fine_Some_(String)](String,Port[_StdP_Fine_Some_(Stream)]));
+	if(String)
+		if(fputs(String,(Stream)?(Stream):(stdout))<0);
+		else
+			return _SUCCESS_;
+	else;
+
+	return _FAILURE_;
 }
 static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const restrict Stream)
 {
-	int(*const Puts_[2])(const wchar_t *const restrict,FILE *const restrict)={[_SUCCESS_]=fputws,[_FAILURE_]=_StrP_WC_Puts_Fail_};
-	FILE *const Port[2]={[_SUCCESS_]=Stream,[_FAILURE_]=stdout};
+	if(String)
+		if(fputws(String,(Stream)?(Stream):(stdout))<0);
+		else
+			return _SUCCESS_;
+	else;
 
-	return _StdP_Fine_MSB0_(Puts_[_StdP_Fine_Some_(String)](String,Port[_StdP_Fine_Some_(Stream)]));
+	return _FAILURE_;
 }
 #endif
 
 #if(1)
-extern STRPACK StrP=
+_Static_assert((sizeof(STRPACE)<<7)==sizeof(STRPACK),"sizeof(STRPACK) != 128*sizeof(STRPACE)");
+extern _Alignas(sizeof(STRPACE)<<7) STRPACK StrP=
 {
+	.Version=_INC_STRPURE,
+	.Bool=&(const struct _strp_b2)
+	{
+		.Success=_SUCCESS_,
+		.Failure=_FAILURE_
+	},
+	.Errno=&(const struct _strp_en)
+	{
+		.Zero=0,
+		.Dom=EDOM,
+		.IlSeq=EILSEQ,
+		.Range=ERANGE
+	},
+	.LC=&(const struct _strp_lc)
+	{
+		.All=LC_ALL,
+		.Collate=LC_COLLATE,
+		.CType=LC_CTYPE,
+		.Monetary=LC_MONETARY,
+		.Numeric=LC_NUMERIC,
+		.Time=LC_TIME
+	},
 	.NC=
 	{
+		.WC=
+		{
+			.x0010_=StrP_NC_WC_0x0010_,
+			.x0040_=StrP_NC_WC_0x0040_,
+			.x0100_=StrP_NC_WC_0x0100_,
+			.x0400_=StrP_NC_WC_0x0400_
+		},
 		.Length=
 		{
 			.x0010_=StrP_NC_Length_0x0010_,
@@ -190,6 +218,13 @@ extern STRPACK StrP=
 	},
 	.WC=
 	{
+		.NC=
+		{
+			.x0010_=StrP_WC_NC_0x0010_,
+			.x0040_=StrP_WC_NC_0x0040_,
+			.x0100_=StrP_WC_NC_0x0100_,
+			.x0400_=StrP_WC_NC_0x0400_
+		},
 		.Length=
 		{
 			.x0010_=StrP_WC_Length_0x0010_,
@@ -294,45 +329,6 @@ extern STRPACK StrP=
 			.x0100_=StrP_WC_Gets_0x0100_,
 			.x0400_=StrP_WC_Gets_0x0400_
 		}
-	},
-	.Convert=
-	{
-		.NC.WC=
-		{
-			.x0010_=StrP_NC_WC_0x0010_,
-			.x0040_=StrP_NC_WC_0x0040_,
-			.x0100_=StrP_NC_WC_0x0100_,
-			.x0400_=StrP_NC_WC_0x0400_
-		},
-		.WC.NC=
-		{
-			.x0010_=StrP_WC_NC_0x0010_,
-			.x0040_=StrP_WC_NC_0x0040_,
-			.x0100_=StrP_WC_NC_0x0100_,
-			.x0400_=StrP_WC_NC_0x0400_
-		}
-	},
-	.Errno=
-	{
-		.Zero=0,
-		.Dom=EDOM,
-		.IlSeq=EILSEQ,
-		.Range=ERANGE
-	},
-	.LC=
-	{
-		.All=LC_ALL,
-		.Collate=LC_COLLATE,
-		.CType=LC_CTYPE,
-		.Monetary=LC_MONETARY,
-		.Numeric=LC_NUMERIC,
-		.Time=LC_TIME
-	},
-	.Version=_StringVersion,
-	.Bool=
-	{
-		.Success=_SUCCESS_,
-		.Failure=_FAILURE_
 	}
 };
 extern STRPACK *StrP_(void) { return &StrP; }

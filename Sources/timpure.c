@@ -2,36 +2,47 @@
 #include "timpure.h"
 
 #if(1)
-static _Alignas(16) const char _StringVersion[16]=_INC_TIMPURE;
-static _Alignas(int) const struct tm _TMInvalid={.tm_sec=-1,.tm_min=-1,.tm_hour=-1,.tm_mday=-1,.tm_mon=-1,.tm_year=-1,.tm_wday=-1,.tm_yday=-1,.tm_isdst=-1};
-#endif
-
-#if(1)
 static struct tm TimP_Cast_Obj_Val_(const time_t Val,const _Bool Mode)
 {
-	struct tm Obj,*(*const Cast_[2])(const time_t *const restrict,struct tm *const restrict)={[0]=gmtime_s,[1]=localtime_s};
-	const struct tm *const Table[2]={[_SUCCESS_]=&Obj,[_FAILURE_]=&_TMInvalid};
+	struct tm Obj;
 
-	return *(Table[_StdP_Fine_Some_(Cast_[Mode&1](&Val,&Obj))]);
+	if(((Mode)?(localtime_s):(gmtime_s))(&Val,&Obj));
+	else
+		Obj.tm_isdst=Obj.tm_yday=Obj.tm_wday=Obj.tm_year=Obj.tm_mon=Obj.tm_mday=Obj.tm_hour=Obj.tm_min=Obj.tm_sec=-1;
+
+	return Obj;
 }
 static time_t TimP_Cast_Val_Obj_(struct tm Obj) { return mktime(&Obj); }
 #endif
 
 #if(1)
 static time_t TimP_Current_(void) { return time(NULL); }
-static _Bool TimP_Textual_(char *const Text,const time_t Time) { return _StdP_Fine_Zero_(ctime_s(Text,26,&Time)); }
+static _Bool TimP_Textual_(char *const Text,const time_t Time)
+{
+	if(ctime_s(Text,26,&Time))
+		return _FAILURE_;
+	else
+		return _SUCCESS_;
+}
 #endif
 
 #if(1)
 static struct tm TimP_TM_Current_(const _Bool Mode) { return TimP_Cast_Obj_Val_(TimP_Current_(),Mode); }
-static _Bool TimP_TM_Textual_(char *const Text,const struct tm Time) { return _StdP_Fine_Zero_(asctime_s(Text,26,&Time)); }
+static _Bool TimP_TM_Textual_(char *const Text,const struct tm Time)
+{
+	if(asctime_s(Text,26,&Time))
+		return _FAILURE_;
+	else
+		return _SUCCESS_;
+}
 #endif
 
 #if(1)
-extern TIMPACK TimP=
+_Static_assert((sizeof(TIMPACE)<<3)==sizeof(TIMPACK),"sizeof(TIMPACK) != 8*sizeof(TIMPACE)");
+extern _Alignas(sizeof(TIMPACE)<<3) TIMPACK TimP=
 {
-	.Version=_StringVersion,
-	.Bool=
+	.Version=_INC_TIMPURE,
+	.Bool=&(const struct _timp_b2)
 	{
 		.Success=_SUCCESS_,
 		.Failure=_FAILURE_
