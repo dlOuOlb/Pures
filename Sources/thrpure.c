@@ -2,7 +2,7 @@
 #include "thrpure.h"
 
 #if(1)
-typedef struct { _Alignas(void*) struct { union { thrp_e_ Event_;thrp_p_ Proc_; };size_t Size; }; }thrp_tp;
+typedef struct { _Alignas(void*) struct { thrp_p_ Proc_;size_t Size; }; }thrp_tp;
 typedef const thrp_tp THRP_TP;
 
 struct _thrp_qu { _Alignas(void*) struct { mtx_t Lock,Wait;size_t Capacity,Count;thrp_tp *Pin[2];thrd_t Thread; }; };
@@ -10,23 +10,46 @@ struct _thrp_mu { mtx_t Tex; };
 #endif
 
 #if(1)
-static const struct { const thrd_t Thread;THRP_TP TP; }Empty;
-static struct { mtx_t *const Qu,*const Mu; }GLock={.Qu=&(mtx_t) { 0 },.Mu=&(mtx_t) { 0 }};
+static const struct
+{
+	_Alignas(16) const char Version[16];
+	const struct { const thrd_t Thread;THRP_TP TP; }Empty;
+	_Alignas(int) const struct _thrpack_flag Flag;
+	const struct _thrpack_signal Signal;
+}
+_Post=
+{
+	.Version=_INC_THRPURE,
+	.Signal=
+	{
+		.Continue=true,
+		.Break=false
+	},
+	.Flag=
+	{
+		.Success=thrd_success,
+		.TimedOut=thrd_timedout,
+		.Busy=thrd_busy,
+		.NoMem=thrd_nomem,
+		.Error=thrd_error
+	}
+};
+static struct { mtx_t *const Qu,*const Mu; }_GLock={.Qu=&(mtx_t) { 0 },.Mu=&(mtx_t) { 0 }};
 
 static void *_ThrP_Malloc_(const size_t Size) { return aligned_alloc(sizeof(void*),Size); }
 static size_t _ThrP_Padding_(register size_t V) { const size_t T=sizeof(void*);V--;V+=T;V/=T;V*=T;return V; }
-static int _ThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&(Empty.Thread),sizeof(thrd_t)); }
-static void _ThrP_Empty_Thread_(thrd_t *const Thread) { memcpy(Thread,&(Empty.Thread),sizeof(thrd_t));return; }
+static int _ThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&(_Post.Empty.Thread),sizeof(thrd_t)); }
+static void _ThrP_Empty_Thread_(thrd_t *const Thread) { memcpy(Thread,&(_Post.Empty.Thread),sizeof(thrd_t));return; }
 static int _ThrP_Flag_(register const int Flag,register const int Temp) { return ((Temp==thrd_success)?(Flag):(Temp)); }
 #endif
 
 #if(1)
 #if(1)
-static void _ThrP_Qu_Exit_Once_(void) { mtx_destroy(GLock.Qu);return; }
+static void _ThrP_Qu_Exit_Once_(void) { mtx_destroy(_GLock.Qu);return; }
 static void _ThrP_Qu_Exit_(void) { static once_flag _FlagExit=ONCE_FLAG_INIT;call_once(&_FlagExit,_ThrP_Qu_Exit_Once_);return; }
 static void _ThrP_Qu_Init_Once_(void)
 {
-	int Flag=mtx_init(GLock.Qu,mtx_plain);
+	int Flag=mtx_init(_GLock.Qu,mtx_plain);
 
 	if(Flag==thrd_success)
 		Flag=atexit(_ThrP_Qu_Exit_);
@@ -76,7 +99,7 @@ static void _ThrP_Qu_Nullify_(thrp_qu *const Qu)
 	thrp_tp *const restrict Take=_ThrP_Qu_Capable_(Qu,sizeof(thrp_tp));
 
 	if(Take)
-		*Take=Empty.TP;
+		*Take=_Post.Empty.TP;
 	else;
 
 	return;
@@ -165,7 +188,7 @@ static int _ThrP_Qu_Stream_(void *const Pass)
 		THRP_TP *const restrict Task=Qu->Pin[0];
 		const void *const Arg=(Task->Size)?(Task+1):(NULL);
 
-		if(Task->Proc_(Arg)==_SUCCESS_)
+		if(Task->Proc_(Arg))
 			Flag=_ThrP_Qu_Remove_(Qu,&Count);
 		else
 			Flag=thrd_error;
@@ -253,7 +276,7 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 {
 	_ThrP_Qu_Init_();
 
-	if(mtx_lock(GLock.Qu)==thrd_success)
+	if(mtx_lock(_GLock.Qu)==thrd_success)
 	{
 		thrp_qu *const restrict Qu=*Ptr;
 
@@ -262,7 +285,7 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 			mtx_t *const Wait=&(Qu->Wait);
 			int Flag=mtx_trylock(Wait);
 
-			if(mtx_unlock(GLock.Qu)==thrd_success)
+			if(mtx_unlock(_GLock.Qu)==thrd_success)
 				switch(Flag)
 				{
 				case thrd_busy:
@@ -284,13 +307,13 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 			else;
 		}
 		else
-			mtx_unlock(GLock.Qu);
+			mtx_unlock(_GLock.Qu);
 	}
 	else;
 
 	return thrd_error;
 }
-static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *const Arg,const size_t Copy)
+static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const size_t Copy,const void *const Arg)
 {
 	_ThrP_Qu_Init_();
 
@@ -301,7 +324,7 @@ static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *con
 
 		if(Size<Copy);
 		else if(Pack<Size);
-		else if(mtx_lock(GLock.Qu)==thrd_success)
+		else if(mtx_lock(_GLock.Qu)==thrd_success)
 		{
 			thrp_qu *const restrict Qu=*Ptr;
 
@@ -309,10 +332,10 @@ static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const void *con
 			{
 				const int Flag=(Pack>(Qu->Capacity))?(thrd_nomem):(_ThrP_Qu_Attach_(Qu,Proc_,Arg,Copy,Size,Pack));
 
-				return _ThrP_Flag_(Flag,mtx_unlock(GLock.Qu));
+				return _ThrP_Flag_(Flag,mtx_unlock(_GLock.Qu));
 			}
 			else
-				mtx_unlock(GLock.Qu);
+				mtx_unlock(_GLock.Qu);
 		}
 		else;
 	}
@@ -331,7 +354,7 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 
 	if(Size<sizeof(thrp_qu));
 	else if(Size<Space);
-	else if(mtx_lock(GLock.Qu)==thrd_success)
+	else if(mtx_lock(_GLock.Qu)==thrd_success)
 		if(*Ptr)
 			goto UNLOCK;
 		else
@@ -346,7 +369,7 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 
 						_ThrP_Qu_Reset_(*Ptr=Qu);
 
-						return mtx_unlock(GLock.Qu);
+						return mtx_unlock(_GLock.Qu);
 					}
 					else
 						goto KILL_LOCK;
@@ -357,7 +380,7 @@ static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
 
 KILL_LOCK:	mtx_destroy(&(Qu->Lock));
 KILL_THIS:	free(Qu);
-UNLOCK:		mtx_unlock(GLock.Qu);
+UNLOCK:		mtx_unlock(_GLock.Qu);
 		}
 	else;
 
@@ -367,7 +390,7 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 {
 	_ThrP_Qu_Init_();
 
-	if(mtx_lock(GLock.Qu)==thrd_success)
+	if(mtx_lock(_GLock.Qu)==thrd_success)
 	{
 		thrp_qu *const restrict Qu=*Ptr;
 
@@ -382,10 +405,10 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 			free(Qu);
 			*Ptr=NULL;
 
-			return _ThrP_Flag_(Flag,mtx_unlock(GLock.Qu));
+			return _ThrP_Flag_(Flag,mtx_unlock(_GLock.Qu));
 		}
 		else
-			mtx_unlock(GLock.Qu);
+			mtx_unlock(_GLock.Qu);
 	}
 	else;
 
@@ -396,11 +419,11 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 
 #if(1)
 #if(1)
-static void _ThrP_Mu_Exit_Once_(void) { mtx_destroy(GLock.Mu);return; }
+static void _ThrP_Mu_Exit_Once_(void) { mtx_destroy(_GLock.Mu);return; }
 static void _ThrP_Mu_Exit_(void) { static once_flag _FlagExit=ONCE_FLAG_INIT;call_once(&_FlagExit,_ThrP_Mu_Exit_Once_);return; }
 static void _ThrP_Mu_Init_Once_(void)
 {
-	int Flag=mtx_init(GLock.Mu,mtx_plain);
+	int Flag=mtx_init(_GLock.Mu,mtx_plain);
 
 	if(Flag==thrd_success)
 		Flag=atexit(_ThrP_Mu_Exit_);
@@ -420,7 +443,7 @@ static int ThrP_Mu_Take_(thrp_mu *const *const Ptr,const _Bool Wait)
 {
 	_ThrP_Mu_Init_();
 
-	if(mtx_lock(GLock.Mu)==thrd_success)
+	if(mtx_lock(_GLock.Mu)==thrd_success)
 	{
 		thrp_mu *const restrict Mu=*Ptr;
 
@@ -429,7 +452,7 @@ static int ThrP_Mu_Take_(thrp_mu *const *const Ptr,const _Bool Wait)
 			mtx_t *const Mutex=&(Mu->Tex);
 			int Flag=mtx_trylock(Mutex);
 
-			if(mtx_unlock(GLock.Mu)==thrd_success)
+			if(mtx_unlock(_GLock.Mu)==thrd_success)
 			{
 				if(Flag==thrd_busy)
 					if(Wait)
@@ -444,7 +467,7 @@ static int ThrP_Mu_Take_(thrp_mu *const *const Ptr,const _Bool Wait)
 			else;
 		}
 		else
-			mtx_unlock(GLock.Mu);
+			mtx_unlock(_GLock.Mu);
 	}
 	else;
 
@@ -454,7 +477,7 @@ static int ThrP_Mu_Give_(thrp_mu *const *const Ptr,const _Bool Wait)
 {
 	_ThrP_Mu_Init_();
 
-	if(mtx_lock(GLock.Mu)==thrd_success)
+	if(mtx_lock(_GLock.Mu)==thrd_success)
 	{
 		thrp_mu *const restrict Mu=*Ptr;
 
@@ -463,7 +486,7 @@ static int ThrP_Mu_Give_(thrp_mu *const *const Ptr,const _Bool Wait)
 			mtx_t *const Mutex=&(Mu->Tex);
 			int Flag=mtx_trylock(Mutex);
 
-			if(mtx_unlock(GLock.Mu)==thrd_success)
+			if(mtx_unlock(_GLock.Mu)==thrd_success)
 				switch(Flag)
 				{
 				case thrd_busy:
@@ -482,7 +505,7 @@ static int ThrP_Mu_Give_(thrp_mu *const *const Ptr,const _Bool Wait)
 			else;
 		}
 		else
-			mtx_unlock(GLock.Mu);
+			mtx_unlock(_GLock.Mu);
 	}
 	else;
 
@@ -495,7 +518,7 @@ static int ThrP_Mu_Create_(thrp_mu **const Ptr)
 {
 	_ThrP_Mu_Init_();
 
-	if(mtx_lock(GLock.Mu)==thrd_success)
+	if(mtx_lock(_GLock.Mu)==thrd_success)
 		if(*Ptr)
 			goto UNLOCK;
 		else
@@ -507,7 +530,7 @@ static int ThrP_Mu_Create_(thrp_mu **const Ptr)
 				{
 					*Ptr=Mu;
 
-					return mtx_unlock(GLock.Mu);
+					return mtx_unlock(_GLock.Mu);
 				}
 				else
 					goto KILL_THIS;
@@ -515,7 +538,7 @@ static int ThrP_Mu_Create_(thrp_mu **const Ptr)
 				goto UNLOCK;
 
 KILL_THIS:	free(Mu);
-UNLOCK:		mtx_unlock(GLock.Mu);
+UNLOCK:		mtx_unlock(_GLock.Mu);
 		}
 	else;
 
@@ -525,7 +548,7 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 {
 	_ThrP_Mu_Init_();
 
-	if(mtx_lock(GLock.Mu)==thrd_success)
+	if(mtx_lock(_GLock.Mu)==thrd_success)
 	{
 		thrp_mu *const restrict Mu=*Ptr;
 
@@ -537,9 +560,9 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 			switch(Flag)
 			{
 			case thrd_busy:
-				if(mtx_unlock(GLock.Mu)==thrd_success);else break;
+				if(mtx_unlock(_GLock.Mu)==thrd_success);else break;
 				if(mtx_lock(Mutex)==thrd_success);else break;
-				if(mtx_lock(GLock.Mu)==thrd_success)
+				if(mtx_lock(_GLock.Mu)==thrd_success)
 			case thrd_success:
 					if(mtx_unlock(Mutex)==thrd_success)
 					{
@@ -547,16 +570,16 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 						free(Mu);
 						*Ptr=NULL;
 
-						return _ThrP_Flag_(Flag,mtx_unlock(GLock.Mu));
+						return _ThrP_Flag_(Flag,mtx_unlock(_GLock.Mu));
 					}
 					else
-			default:	mtx_unlock(GLock.Mu);
+			default:	mtx_unlock(_GLock.Mu);
 				else
 					mtx_unlock(Mutex);
 			}
 		}
 		else
-			mtx_unlock(GLock.Mu);
+			mtx_unlock(_GLock.Mu);
 	}
 	else;
 
@@ -569,20 +592,23 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 static _Bool _ThrP_Thread_Okay_(int Time)
 {
 	if(Time<0)
-		return _FAILURE_;
+		return false;
 	else
 	{
 		const int Kilo=+1000;
 		const time_t Cast=(time_t)(Time/=Kilo);
 		const int Back=(int)(Cast);
 
-		if(Back==Time)
-			return _SUCCESS_;
-		else
-			return _FAILURE_;
+		return (Back==Time);
 	}
 }
-static struct timespec _ThrP_Thread_Time_(register const int T) { const int K=+1000;const long M=+1000000L;return (struct timespec) { .tv_sec=(time_t)(T/K),.tv_nsec=M*(long)(T%K) }; }
+static struct timespec _ThrP_Thread_Time_(register const int T)
+{
+	const int K=+1000;
+	const long M=+1000000L;
+	
+	return (struct timespec) { .tv_sec=(time_t)(T/K),.tv_nsec=M*(long)(T%K) };
+}
 static _Bool ThrP_Thread_Sleep_(const void *const _)
 {
 	const int Time=*((const int*)(_));
@@ -592,7 +618,7 @@ static _Bool ThrP_Thread_Sleep_(const void *const _)
 			switch(thrd_sleep(&Holder,&Remain))
 			{
 			case 0:
-				return _SUCCESS_;
+				return true;
 			case-1:
 				if(Remain.tv_sec<0);
 				else if(Holder.tv_sec<Remain.tv_sec);
@@ -602,20 +628,14 @@ static _Bool ThrP_Thread_Sleep_(const void *const _)
 				else
 					break;
 			default:
-				return _FAILURE_;
+				return false;
 			}
 	else
-		return _FAILURE_;
+		return false;
 }
-static _Bool ThrP_Thread_Yield_(const void *const _) { (void)(_);thrd_yield();return _SUCCESS_; }
-static _Bool ThrP_Thread_Break_(const void *const _) { (void)(_);return _FAILURE_; }
-static _Bool ThrP_Thread_Print_(const void *const _)
-{
-	if(puts(_)<0)
-		return _FAILURE_;
-	else
-		return _SUCCESS_;
-}
+static _Bool ThrP_Thread_Yield_(const void *const _) { (void)(_);thrd_yield();return true; }
+static _Bool ThrP_Thread_Break_(const void *const _) { (void)(_);return false; }
+static _Bool ThrP_Thread_Print_(const void *const _) { return (puts(_)>=0); }
 #endif
 
 #if(1)
@@ -623,12 +643,11 @@ static int _ThrP_Event_Thread_(void *const Pass)
 {
 	thrp_tp *const restrict Task=Pass;
 	const void *const Arg=(Task->Size)?(Task+1):(NULL);
-
-	Task->Event_(Arg);
+	const _Bool Signal=Task->Proc_(Arg);
 
 	free(Task);
 
-	return thrd_success;
+	return ((Signal)?(EXIT_SUCCESS):(EXIT_FAILURE));
 }
 static int _ThrP_Event_Launch_(thrp_tp *const Task)
 {
@@ -642,9 +661,9 @@ static int _ThrP_Event_Launch_(thrp_tp *const Task)
 
 	return Flag;
 }
-static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const Arg,const size_t Copy)
+static int ThrP_Event_Invoke_(THRP_P_ Proc_,const size_t Copy,const void *const Arg)
 {
-	if(Event_)
+	if(Proc_)
 	{
 		const size_t Size=_ThrP_Padding_(Copy);
 		const size_t Pack=Size+sizeof(thrp_tp);
@@ -657,7 +676,7 @@ static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const Arg,const size_t 
 
 			if(Hold)
 			{
-				Hold->Event_=Event_;
+				Hold->Proc_=Proc_;
 				Hold->Size=Size;
 
 				if(Copy)
@@ -677,24 +696,22 @@ static int ThrP_Event_Invoke_(THRP_E_ Event_,const void *const Arg,const size_t 
 #endif
 
 #if(1)
-_Static_assert((sizeof(THRPACE)<<4)==sizeof(THRPACK),"sizeof(THRPACK) != 16*sizeof(THRPACE)");
-extern _Alignas(sizeof(THRPACE)<<4) THRPACK ThrP=
+_Static_assert(sizeof(THRPACK)==(sizeof(THRPACE)<<4),"sizeof(THRPACK) != 16*sizeof(THRPACE)");
+extern _Alignas(THRPACK) THRPACK ThrP=
 {
-	.Version=_INC_THRPURE,
-	.Signal=&(const struct _thrp_b2)
 	{
-		.Continue=_SUCCESS_,
-		.Break=_FAILURE_
+		.Version=_Post.Version,
+		.Signal=&(_Post.Signal),
+		.Flag=&(_Post.Flag),
+		.Event.Invoke_=ThrP_Event_Invoke_
 	},
-	.Flag=&(const struct _thrp_en)
+	.Task=
 	{
-		.Success=thrd_success,
-		.TimedOut=thrd_timedout,
-		.Busy=thrd_busy,
-		.NoMem=thrd_nomem,
-		.Error=thrd_error
+		.Sleep_=ThrP_Thread_Sleep_,
+		.Yield_=ThrP_Thread_Yield_,
+		.Break_=ThrP_Thread_Break_,
+		.Print_=ThrP_Thread_Print_
 	},
-	.Event.Invoke_=ThrP_Event_Invoke_,
 	.Qu=
 	{
 		.Create_=ThrP_Qu_Create_,
@@ -708,13 +725,6 @@ extern _Alignas(sizeof(THRPACE)<<4) THRPACK ThrP=
 		.Delete_=ThrP_Mu_Delete_,
 		.Take_=ThrP_Mu_Take_,
 		.Give_=ThrP_Mu_Give_
-	},
-	.Task=
-	{
-		.Sleep_=ThrP_Thread_Sleep_,
-		.Yield_=ThrP_Thread_Yield_,
-		.Break_=ThrP_Thread_Break_,
-		.Print_=ThrP_Thread_Print_
 	}
 };
 extern THRPACK *ThrP_(void) { return &ThrP; }

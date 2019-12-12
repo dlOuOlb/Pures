@@ -24,6 +24,8 @@ _Static_assert((sizeof(void(*)(void))&(sizeof(void(*)(void))-1))==0,"sizeof(void
 #include <errno.h>
 #include <limits.h>
 #include <locale.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -32,9 +34,6 @@ _Static_assert((sizeof(void(*)(void))&(sizeof(void(*)(void))-1))==0,"sizeof(void
 #include <threads.h>
 #include <time.h>
 #include <wchar.h>
-
-#define _SUCCESS_ ((_Bool)(1))
-#define _FAILURE_ ((_Bool)(0))
 
 #else
 #error The compiler does not support the C Library Extension 1.

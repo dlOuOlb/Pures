@@ -42,16 +42,7 @@ static int Func_(TT,Crop,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const res
 static int Func_(TT,Comp,XXXX)(TT_XXXX *const Left,TT_XXXX *const Right) { return _StrP_Comp_(Left->TT,Right->TT,OxXXXX); }
 static int Func_(TT,Cast,XXXX)(tt_xxxx *const restrict Target,TT_XXXX *const restrict Source) { return _StrP_Cast_(Target->TT,OxXXXX,Source->TT,OxXXXX-0x0001); }
 
-static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const restrict Stream)
-{
-	if(String)
-		if(_StrP_Gets_(String->TT,OxXXXX,(Stream)?(Stream):(stdin)))
-			return _SUCCESS_;
-		else;
-	else;
-
-	return _FAILURE_;
-}
+static _Bool Func_(TT,Gets,XXXX)(tt_xxxx *const restrict String,FILE *const restrict Stream) { return ((String)&&(_StrP_Gets_(String->TT,OxXXXX,(Stream)?(Stream):(stdin)))&&(true)); }
 
 #else
 

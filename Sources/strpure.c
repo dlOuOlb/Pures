@@ -10,10 +10,50 @@ typedef const wchar_t STRP_WC;
 #endif
 
 #if(1)
+static const struct
+{
+	_Alignas(16) const char Version[16];
+	const struct _strpack_errno Errno;
+	const struct _strpack_lc LC;
+	const struct _strpack_bool Bool;
+	const char Locale[2];
+}
+_Post=
+{
+	.Version=_INC_STRPURE,
+	.Bool=
+	{
+		.Success=true,
+		.Failure=false
+	},
+	.Errno=
+	{
+		.Zero=0,
+		.Dom=EDOM,
+		.IlSeq=EILSEQ,
+		.Range=ERANGE
+	},
+	.LC=
+	{
+		.All=LC_ALL,
+		.Collate=LC_COLLATE,
+		.CType=LC_CTYPE,
+		.Monetary=LC_MONETARY,
+		.Numeric=LC_NUMERIC,
+		.Time=LC_TIME
+	},
+	.Locale="C"
+};
+#endif
+
+#if(1)
 static char *_StrP_NC_Find_Forward_(const char *const String,const char Character) { return strchr(String,Character); }
 static char *_StrP_NC_Find_Reverse_(const char *const String,const char Character) { return strrchr(String,Character); }
 
 #include "strpain.c"
+
+static _Bool StrP_NC_Puts_(const char *const restrict String,FILE *const restrict Stream) { return ((String)&&(fputs(String,(Stream)?(Stream):(stdout))>=0)); }
+static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const restrict Stream) { return ((String)&&(fputws(String,(Stream)?(Stream):(stdout))>=0)); }
 #endif
 
 #if(1)
@@ -25,12 +65,14 @@ static int _StrP_Convert_(errno_t(*const Convert_)(size_t *const restrict,void *
 		const void *Pin=Source;
 		mbstate_t State={0};
 
-		if(Convert_(&Length,NULL,0,&Pin,0,&State))
-			return _FAILURE_;
+		const int Flag=Convert_(&Length,NULL,0,&Pin,0,&State);
+
+		if(Flag)
+			return Flag;
 		else if(Length<Size)
 			Length++;
 		else
-			return _FAILURE_;
+			return ERANGE;
 	}
 	{
 		const void *Pin=Source;
@@ -54,53 +96,31 @@ static int StrP_WC_NC_0x0400_(strp_wc_0x0400 *const restrict Target,STRP_NC_0X04
 #endif
 
 #if(1)
-static _Bool StrP_NC_Puts_(const char *const restrict String,FILE *const restrict Stream)
+static _Bool StrP_Locale_Get_(const int Category,const size_t Size,char *const Buffer)
 {
-	if(String)
-		if(fputs(String,(Stream)?(Stream):(stdout))<0);
-		else
-			return _SUCCESS_;
-	else;
+	const char *const Locale=setlocale(Category,NULL);
 
-	return _FAILURE_;
+	return ((Locale)&&(strcpy_s(Buffer,Size,Locale)==0));
 }
-static _Bool StrP_WC_Puts_(const wchar_t *const restrict String,FILE *const restrict Stream)
-{
-	if(String)
-		if(fputws(String,(Stream)?(Stream):(stdout))<0);
-		else
-			return _SUCCESS_;
-	else;
-
-	return _FAILURE_;
-}
+static _Bool StrP_Locale_Set_(const int Category,const char *const Locale) { return ((setlocale(Category,Locale))&&(true)); }
 #endif
 
 #if(1)
-_Static_assert((sizeof(STRPACE)<<7)==sizeof(STRPACK),"sizeof(STRPACK) != 128*sizeof(STRPACE)");
-extern _Alignas(sizeof(STRPACE)<<7) STRPACK StrP=
+_Static_assert(sizeof(STRPACK)==(sizeof(STRPACE)<<7),"sizeof(STRPACK) != 128*sizeof(STRPACE)");
+extern _Alignas(STRPACK) STRPACK StrP=
 {
-	.Version=_INC_STRPURE,
-	.Bool=&(const struct _strp_b2)
 	{
-		.Success=_SUCCESS_,
-		.Failure=_FAILURE_
+		.Version=_Post.Version,
+		.Bool=&(_Post.Bool),
+		.Errno=&(_Post.Errno),
+		.LC=&(_Post.LC)
 	},
-	.Errno=&(const struct _strp_en)
+	.Locale=
 	{
-		.Zero=0,
-		.Dom=EDOM,
-		.IlSeq=EILSEQ,
-		.Range=ERANGE
-	},
-	.LC=&(const struct _strp_lc)
-	{
-		.All=LC_ALL,
-		.Collate=LC_COLLATE,
-		.CType=LC_CTYPE,
-		.Monetary=LC_MONETARY,
-		.Numeric=LC_NUMERIC,
-		.Time=LC_TIME
+		.Default=_Post.Locale+0,
+		.Environment=_Post.Locale+1,
+		.Get_=StrP_Locale_Get_,
+		.Set_=StrP_Locale_Set_
 	},
 	.NC=
 	{
