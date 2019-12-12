@@ -1,23 +1,22 @@
 ﻿#ifndef _INC_STRPURE
-#define _INC_STRPURE "StrP:2019.11.29"
-/*------------------------------------------------------------------*/
-/*	StrPure provides some inflexible string handling functions.		*/
-/*																	*/
-/*	Written by Ranny Clover											*/
-/*	http://github.com/dlOuOlb/Pures/								*/
-/*------------------------------------------------------------------*/
-/*	[!] Non-Standard Assumptions:									*/
-/*																	*/
-/*	- All data pointers have the same size, a power of 2.			*/
-/*	- All function pointers have the same size, a power of 2.		*/
-/*------------------------------------------------------------------*/
-/*	DLL IMPORT EXAMPLE:												*/
-/*																	*/
-/*	#define _PURES_DLL_IMPORT_ __declspec(dllimport)				*/
-/*	#include <strpure.h>											*/
-/*------------------------------------------------------------------*/
+#define _INC_STRPURE "StrP:2019.12.12"
+/*------------------------------------------------------------------+
+|	StrPure provides some inflexible string handling functions.		|
+|																	|
+|	Written by Ranny Clover											|
+|	http://github.com/dlOuOlb/Pures/								|
++-------------------------------------------------------------------+
+|	[!] Non-Standard Assumptions:									|
+|																	|
+|	- All data pointers have the same size, a power of 2.			|
+|	- All function pointers have the same size, a power of 2.		|
++-------------------------------------------------------------------+
+|	[+] Pre-Header Definitions:										|
+|																	|
+|	#define _PURES_DLL_IMPORT_ __declspec(dllimport)				|
+|	#define _STRP_MACRO_DEFINE_										|
++------------------------------------------------------------------*/
 
-#include <stddef.h>
 #include <stdio.h>
 
 #define _StrP_Define_(type,form,FORM,Nums) typedef struct{type FORM[0x##Nums];}strp_##form##_0x##Nums;typedef const strp_##form##_0x##Nums STRP_##FORM##_0X##Nums
@@ -34,10 +33,7 @@ _StrP_Define_(wchar_t,wc,WC,0400);	//StrPure : strp_wc_0x0400.WC for wchar_t [0x
 
 #undef _StrP_Define_
 
-//StrPure : Automatic String Declaration
-#define StrP_Auto_(type,Auto,String) type*const(Auto)=&(type){String}
-
-//StrPure : Union for Library Alignment
+//StrPure : Library Alignment Union
 typedef const union { const void *const D;void(*const F_)(void); }STRPACE;
 
 //StrPure : Library Pack Structure
@@ -47,28 +43,28 @@ typedef const struct
 	_StrP_Align_(4) const struct
 	{
 		//StrPure : Library Version - "StrP:yyyy.mm.dd"
-		_StrP_Align_(1) const char *const Version;
+		_StrP_Align_(1) const char *const restrict Version;
 
 		//StrPure : Boolean Return Values
-		_StrP_Align_(1) const struct _strp_b2
+		_StrP_Align_(1) const struct _strpack_bool
 		{
-			const _Bool Success;	//StrPure : No problem.
-			const _Bool Failure;	//StrPure : Something wrong.
+			const _Bool Success;	//StrPure : (1) No problem.
+			const _Bool Failure;	//StrPure : (0) Something is wrong.
 		}
-		*const Bool;
+		*const restrict Bool;
 
 		//StrPure : Error Numbers
-		_StrP_Align_(1) const struct _strp_en
+		_StrP_Align_(1) const struct _strpack_errno
 		{
 			const int Zero;		//StrPure : No error.
 			const int Dom;		//StrPure : Mathematics argument out of domain of function.
 			const int IlSeq;	//StrPure : Illegal byte sequence.
 			const int Range;	//StrPure : Result too large.
 		}
-		*const Errno;
+		*const restrict Errno;
 
 		//StrPure : Locale Categories
-		_StrP_Align_(1) const struct _strp_lc
+		_StrP_Align_(1) const struct _strpack_lc
 		{
 			const int All;		//StrPure : Entire C locale.
 			const int Collate;	//StrPure : Collation category.
@@ -77,24 +73,32 @@ typedef const struct
 			const int Numeric;	//StrPure : Numeric formatting category.
 			const int Time;		//StrPure : Time formatting category.
 		}
-		*const LC;
+		*const restrict LC;
 	};
 
-	//StrPure : Preserved for future use.
+	//StrPure : Locale Handling Functions
 	_StrP_Align_(4) const struct
 	{
-		_StrP_Align_(1) const void *const _0;
-		_StrP_Align_(1) const void *const _1;
-		_StrP_Align_(1) const void *const _2;
-		_StrP_Align_(1) const void *const _3;
+		//StrPure : "C" Minimal Locale
+		_StrP_Align_(1) const char *const restrict Default;
+		//StrPure : "" User-Preferred Locale
+		_StrP_Align_(1) const char *const restrict Environment;
+		//StrPure : Get the current locale.
+		//＊Allowed (Category) value is defined under "StrP.LC".
+		//＊Return value is defined under "StrP.Errno".
+		_StrP_Align_(1) _Bool(*const Get_)(const int Category,const size_t Size,char *const Buffer);
+		//StrPure : Set as the specified locale.
+		//＊Allowed (Category) value is defined under "StrP.LC".
+		//＊Return value is defined under "StrP.Errno".
+		_StrP_Align_(1) _Bool(*const Set_)(const int Category,const char *const Locale);
 	}
-	_Preserved4;
+	Locale;
 
 	//StrPure : Null-terminated Native Narrow Character String Functions
 	//＊(strp_nc_0x#### *)'s capacity must not be smaller than char[0x####].
 	//＊(STRP_NC_0X#### *)'s capacity can be smaller than char[0x####],
 	//　but must be null-terminated within it.
-	_StrP_Align_(4) const struct
+	_StrP_Align_(4) const struct _strpack_nc
 	{
 		//StrPure : String Cast Functions
 		//＊Truncation could occur.
@@ -344,7 +348,7 @@ typedef const struct
 	//＊(strp_wc_0x#### *)'s capacity must not be smaller than wchar_t[0x####].
 	//＊(STRP_WC_0X#### *)'s capacity can be smaller than wchar_t[0x####],
 	//　but must be null-terminated within it.
-	_StrP_Align_(4) const struct
+	_StrP_Align_(4) const struct _strpack_wc
 	{
 		//StrPure : String Cast Functions
 		//＊Truncation could occur.
@@ -598,7 +602,15 @@ _PURES_DLL_IMPORT_
 #endif
 
 //StrPure : Library Pack Object
-extern _Alignas(sizeof(STRPACE)<<7) STRPACK StrP;
-//StrPure : Indirect access to the library pack object.
+extern _Alignas(STRPACK) STRPACK StrP;
+//StrPure : Indirect access to the library pack object. (&StrP)
 extern STRPACK *StrP_(void);
+
+#ifdef _STRP_MACRO_DEFINE_
+//StrPure : Nullify the first character of the narrow string.
+#define StrP_NC_Null_(String) do{(String)->NC[0]='\0';}while(0)
+//StrPure : Nullify the first character of the wide string.
+#define StrP_WC_Null_(String) do{(String)->WC[0]=L'\0';}while(0)
+#endif
+
 #endif
