@@ -1,10 +1,10 @@
 ﻿#ifndef _INC_THRPURE
-#define _INC_THRPURE "ThrP:2019.12.12"
+#define _INC_THRPURE "ThrP:2019.12.20"
 /*------------------------------------------------------------------+
 |	ThrPure provides some simple thread managing functions.			|
 |																	|
 |	Written by Ranny Clover											|
-|	http://github.com/dlOuOlb/Pures/								|
+|	http://github.com/dlOuOlb/Pures/blob/master/Headers/thrpure.h	|
 +-------------------------------------------------------------------+
 |	[!] Non-Standard Assumptions:									|
 |																	|
@@ -19,8 +19,11 @@
 
 #include <stddef.h>
 
+//ThrPure : User-Provided Memory Handler
+typedef struct { void(*Return_)(void *const restrict Memory),*(*Borrow_)(void *const restrict Owner,const size_t Align,const size_t Size); }thrp_um;typedef const thrp_um THRP_UM;
+
 //ThrPure : Process Function Pointer
-typedef _Bool(*thrp_p_)(const void *const);typedef const thrp_p_ THRP_P_;
+typedef _Bool(*thrp_p_)(const void *const Arg);typedef const thrp_p_ THRP_P_;
 
 //ThrPure : Task Queue
 typedef struct _thrp_qu thrp_qu;typedef const thrp_qu THRP_QU;
@@ -29,12 +32,13 @@ typedef struct _thrp_qu thrp_qu;typedef const thrp_qu THRP_QU;
 typedef struct _thrp_mu thrp_mu;typedef const thrp_mu THRP_MU;
 
 //ThrPure : Library Alignment Union
-typedef const union { const void *const D;void(*const F_)(void); }THRPACE;
+typedef const union { const size_t S;const void *const D;void(*const F_)(void); }THRPACE;
 
 //ThrPure : Library Pack Structure
 typedef const struct
 #define _ThrP_Align_(N) _Alignas((N)*sizeof(THRPACE))
 {
+	//ThrPure : Pointers to Some Constants
 	_ThrP_Align_(4) const struct
 	{
 		//ThrPure : Library Version - "ThrP:yyyy.mm.dd"
@@ -63,26 +67,14 @@ typedef const struct
 		}
 		*const restrict Flag;
 
-		//ThrPure : Event Functions
-		//＊Return value is defined under "ThrP.Flag".
-		_ThrP_Align_(1) const struct _thrpack_event
-		{
-			//ThrPure : Invoke an event.
-			//＊Data at (ArgAddress) will be captured temporarily by (ArgSize) bytes.
-			//＊The callee must return, not exit.
-			_ThrP_Align_(1) int(*const Invoke_)(THRP_P_,const size_t ArgSize,const void *const ArgAddress);
-		}
-		Event;
+		//ThrPure : Default Memory Handler
+		//＊Each calls "free" and "aligned_alloc", ignoring (Owner).
+		_ThrP_Align_(1) THRP_UM *const restrict UM;
 	};
 
 	//ThrPure : Task Functions
 	_ThrP_Align_(4) const struct _thrpack_task
 	{
-		//ThrPure : Sleep the calling thread.
-		//＊Argument's Type
-		//　const int *const Milliseconds
-		//＊Return value is defined under "ThrP.Signal".
-		_ThrP_Align_(1) _Bool(*const Sleep_)(const void *const Milliseconds);
 		//ThrPure : Yield the calling thread.
 		//＊Input pointer is just ignored.
 		//＊Return value is always "ThrP.Signal->Continue".
@@ -91,6 +83,11 @@ typedef const struct
 		//＊Input pointer is just ignored.
 		//＊Return value is always "ThrP.Signal->Break".
 		_ThrP_Align_(1) _Bool(*const Break_)(const void *const);
+		//ThrPure : Sleep the calling thread.
+		//＊Argument's Type
+		//　const int *const Milliseconds
+		//＊Return value is defined under "ThrP.Signal".
+		_ThrP_Align_(1) _Bool(*const Sleep_)(const void *const Milliseconds);
 		//ThrPure : Print a message.
 		//＊Argument's Type
 		//　const char *const Message
@@ -105,13 +102,14 @@ typedef const struct
 	_ThrP_Align_(4) const struct _thrpack_qu
 	{
 		//ThrPure : Task Queue Memory Allocation - Deallocate with "ThrP.Qu.Delete_".
+		//＊A default memory handler is defined under "ThrP.UM".
 		//＊Reference place should be initialized as NULL.
-		_ThrP_Align_(1) int(*const Create_)(thrp_qu **const,const size_t MemorySize);
+		_ThrP_Align_(1) int(*const Create_)(THRP_UM *const restrict,void *const restrict Owner,thrp_qu **const restrict,const size_t MemorySize);
 		//ThrPure : Task Queue Memory Deallocation
 		//＊If "ThrP.Qu.Wait_" is not called properly before calling of this,
 		//　then "ThrP.Flag->Busy" might be returned,
 		//　though the memory is deallocated anyway.
-		_ThrP_Align_(1) int(*const Delete_)(thrp_qu **const);
+		_ThrP_Align_(1) int(*const Delete_)(thrp_qu **const restrict);
 
 		//ThrPure : Push a task into the task queue.
 		//＊Data at (ArgAddress) will be captured temporarily by (ArgSize) bytes.
@@ -119,10 +117,10 @@ typedef const struct
 		//　then this would wait for the queue to be emptied,
 		//　as long as the task's size is acceptable.
 		//＊The callee must return, not exit.
-		_ThrP_Align_(1) int(*const Push_)(thrp_qu *const *const,THRP_P_,const size_t ArgSize,const void *const ArgAddress);
+		_ThrP_Align_(1) int(*const Push_)(thrp_qu *const *const restrict,THRP_P_,const size_t ArgSize,const void *const restrict ArgAddress);
 		//ThrPure : Wait the task queue and terminate the worker thread.
 		//＊This should be called before "ThrP.Qu.Delete_" is called.
-		_ThrP_Align_(1) int(*const Wait_)(thrp_qu *const *const);
+		_ThrP_Align_(1) int(*const Wait_)(thrp_qu *const *const restrict);
 	}
 	Qu;
 
@@ -132,11 +130,12 @@ typedef const struct
 	_ThrP_Align_(4) const struct _thrpack_mu
 	{
 		//ThrPure : Mutex Memory Allocation - Deallocate with "ThrP.Mu.Delete_".
+		//＊A default memory handler is defined under "ThrP.UM".
 		//＊Reference place should be initialized as NULL.
-		_ThrP_Align_(1) int(*const Create_)(thrp_mu **const);
+		_ThrP_Align_(1) int(*const Create_)(THRP_UM *const restrict,void *const restrict Owner,thrp_mu **const restrict);
 		//ThrPure : Mutex Memory Deallocation
 		//＊All dependencies around the mutex must be released before deletion of it.
-		_ThrP_Align_(1) int(*const Delete_)(thrp_mu **const);
+		_ThrP_Align_(1) int(*const Delete_)(thrp_mu **const restrict);
 
 		//ThrPure : Lock the Mutex
 		//＊If (Wait) equals to 0,
@@ -168,13 +167,19 @@ extern _Alignas(THRPACK) THRPACK ThrP;
 extern THRPACK *ThrP_(void);
 
 #ifdef _THRP_MACRO_DEFINE_
-//ThrPure : Abbreviation of "ThrP.Event.Invoke_" with an instant argument.
-#define ThrP_Event_Invoke_(Event_,TYPE,...) ThrP.Event.Invoke_(Event_,sizeof(TYPE),&(TYPE){__VA_ARGS__})
+//ThrPure : Abbreviation of "ThrP.Task.Yield_" with a null pointer.
+#define ThrP_Task_Yield_() ThrP.Task.Yield_(NULL)
+//ThrPure : Abbreviation of "ThrP.Task.Break_" with a null pointer.
+#define ThrP_Task_Break_() ThrP.Task.Break_(NULL)
+//ThrPure : Abbreviation of "ThrP.Task.Sleep_" with an instant 'int' value.
+#define ThrP_Task_Sleep_(Milliseconds) _Generic((Milliseconds),int:ThrP.Task.Sleep_)(&(const int){(Milliseconds)})
+//ThrPure : Alias for "ThrP.Task.Print_" with a 'char*' type guard.
+#define ThrP_Task_Print_(Message) _Generic((Message),char*:ThrP.Task.Print_)(Message)
 //ThrPure : Abbreviation of "ThrP.Qu.Push_" with an instant argument.
-#define ThrP_Qu_Push_(Queue,Proc_,TYPE,...) ThrP.Qu.Push_(Queue,Proc_,sizeof(TYPE),&(TYPE){__VA_ARGS__})
+#define ThrP_Qu_Push_(Queue,Proc_,TYPE,...) ThrP.Qu.Push_((Queue),(Proc_),sizeof(TYPE),&(TYPE){__VA_ARGS__})
 //ThrPure : Abbreviation of a once-loop over "ThrP.Mu.Take_" and "ThrP.Mu.Give_".
 //＊Do not jump over the loop block, e.g. 'goto', 'break', and 'return'.
-#define ThrP_Mu_Lock_Do_(Ret,Mutex) for(_Bool(_##Ret)=(((Ret)=ThrP.Mu.Take_(Mutex,1))==ThrP.Flag->Success);_##Ret;(Ret)=(ThrP.Mu.Give_(Mutex,(_##Ret)=0)==(ThrP.Flag->Busy))?(ThrP.Flag->Success):(ThrP.Flag->Error))
+#define ThrP_Mu_Lock_Do_(Ret,Mutex) for(_Bool(_##Ret)=(((Ret)=ThrP.Mu.Take_((Mutex),1))==ThrP.Flag->Success);(_##Ret);(Ret)=(ThrP.Mu.Give_((Mutex),(_##Ret)=0)==(ThrP.Flag->Busy))?(ThrP.Flag->Success):(ThrP.Flag->Error))
 #endif
 
 #endif

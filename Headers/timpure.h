@@ -1,10 +1,10 @@
 ﻿#ifndef _INC_TIMPURE
-#define _INC_TIMPURE "TimP:2019.12.12"
+#define _INC_TIMPURE "TimP:2019.12.20"
 /*------------------------------------------------------------------+
 |	TimPure provides some time representing functions.				|
 |																	|
 |	Written by Ranny Clover											|
-|	http://github.com/dlOuOlb/Pures/								|
+|	http://github.com/dlOuOlb/Pures/blob/master/Headers/timpure.h	|
 +-------------------------------------------------------------------+
 |	[!] Non-Standard Assumptions:									|
 |																	|
@@ -29,14 +29,16 @@
 typedef struct { char Text[32]; }timp_tx;typedef const timp_tx TIMP_TX;
 
 //TimPure : Library Alignment Union
-typedef const union { const void *const D;void(*const F_)(void); }TIMPACE;
+typedef const union { const size_t S;const void *const D;void(*const F_)(void); }TIMPACE;
 
 //TimPure : Library Pack Structure
 typedef const struct
 #define _TimP_Align_(N) _Alignas((N)*sizeof(TIMPACE))
 {
+	//TimPure : Basic Time Utilities
 	_TimP_Align_(8) const struct
 	{
+		//TimPure : Pointers to Some Constants
 		_TimP_Align_(2) const struct
 		{
 			//TimPure : Library Version - "TimP:yyyy.mm.dd"
@@ -96,9 +98,11 @@ typedef const struct
 	};
 
 	//TimPure : Time Specification Functions
-	//＊Note that their behaviors depend on the type 'time_t'.
-	_TimP_Align_(8) const struct
+	//＊Note that their behaviors depend on the type 'time_t',
+	//　i.e. invalid for negative values unless 'time_t' is signed.
+	_TimP_Align_(8) const struct _timpack_spec
 	{
+		//TimPure : Time Specification Arithmetics
 		_TimP_Align_(4) const struct
 		{
 			//TimPure : Calculate ( A + B ).
@@ -112,6 +116,7 @@ typedef const struct
 			_TimP_Align_(1) struct timespec(*const Div_)(const struct timespec A,const long C);
 		};
 
+		//TimPure : Time Specification Utilities
 		_TimP_Align_(4) const struct
 		{
 			//TimPure : Conversion from Time Specification to Double
@@ -140,13 +145,15 @@ extern _Alignas(TIMPACK) TIMPACK TimP;
 extern TIMPACK *TimP_(void);
 
 #ifdef _TIMP_MACRO_DEFINE_
+//TimPure : Abbreviation of "TimP.Text.Val_" or "TimP.Text.Obj_".
+#define TimP_Text_(Time) _Generic((Time),time_t:TimP.Text.Val_,struct tm:TimP.Text.Obj_)(Time)
 //TimPure : Abbreviation of combined calls of "TimP.Val.Now_" and "TimP.Text.Val_".
 #define TimP_Text_Val_Now_() TimP.Text.Val_(TimP.Val.Now_())
 //TimPure : Abbreviation of combined calls of "TimP.Obj.Now_" and "TimP.Text.Obj_".
 #define TimP_Text_Obj_Now_() TimP.Text.Obj_(TimP.Obj.Now_())
 //TimPure : Abbreviation of a once-loop over "TimP.Spec.Now_" and "TimP.Spec.Sum_".
 //＊Do not jump over the loop block, e.g. 'goto', 'break', and 'return'.
-#define TimP_Spec_Run_Do_(TimeSpec) for(const struct timespec(_##TimeSpec##Mark)=TimP.Spec.Now_(),*(_##TimeSpec##Temp)=&(_##TimeSpec##Mark);_##TimeSpec##Temp;(TimeSpec)=TimP.Spec.Sum_(TimeSpec,_##TimeSpec##Mark),(_##TimeSpec##Temp)=NULL)
+#define TimP_Spec_Run_Do_(TimeSpec) for(const struct timespec(_##TimeSpec##Mark)=TimP.Spec.Now_(),*(_##TimeSpec##Temp)=&(_##TimeSpec##Mark);(_##TimeSpec##Temp);(TimeSpec)=TimP.Spec.Sum_((TimeSpec),(_##TimeSpec##Mark)),(_##TimeSpec##Temp)=NULL)
 #endif
 
 #endif
