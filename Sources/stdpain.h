@@ -18,22 +18,16 @@
 #ifdef __STDC_LIB_EXT1__
 #define __STDC_WANT_LIB_EXT1__ (1)
 
-_Static_assert((sizeof(void*)&(sizeof(void*)-1))==0,"sizeof(void*) != 1<<N");
-_Static_assert((sizeof(void(*)(void))&(sizeof(void(*)(void))-1))==0,"sizeof(void(*)(void)) != 1<<N");
-
 #include <errno.h>
-#include <limits.h>
 #include <locale.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <threads.h>
 #include <time.h>
-#include <wchar.h>
 
 #else
 #error The compiler does not support the C Library Extension 1.

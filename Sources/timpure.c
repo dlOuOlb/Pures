@@ -67,14 +67,14 @@ static struct timespec _TimP_Spec_Carry_(struct timespec A)
 		const time_t Zero=(time_t)(0);
 		const long Sign=(A.tv_sec>Zero)-(A.tv_sec<Zero);
 
-		A.tv_sec-=(time_t)(Sign);
 		A.tv_nsec+=Sign*Giga;
+		A.tv_sec-=(time_t)(Sign);
 	}
 	{
-		const ldiv_t Nom=ldiv(A.tv_nsec,Giga);
+		const long Quot=A.tv_nsec/Giga;
 
-		A.tv_sec+=(time_t)(Nom.quot);
-		A.tv_nsec=Nom.rem;
+		A.tv_nsec%=Giga;
+		A.tv_sec+=(time_t)(Quot);
 	}
 
 	return A;
@@ -84,53 +84,46 @@ static struct timespec TimP_Spec_Sub_(const struct timespec A,const struct times
 
 static struct timespec TimP_Spec_Mul_(const struct timespec A,const long Mul)
 {
-	const long long Giga=+1000000000LL;
+	const long long Giga=+1000000000LL,Cast=(long long)(Mul);
 	long long Temp[2]={[0]=(long long)(A.tv_sec),[1]=(long long)(A.tv_nsec)};
 
-	{
-		const long long Cast=(long long)(Mul);
+	Temp[0]*=Cast;
+	Temp[1]*=Cast;
 
-		Temp[0]*=Cast;
-		Temp[1]*=Cast;
-	}
-	{
-		const lldiv_t Nom=lldiv(Temp[1],Giga);
-
-		Temp[0]+=Nom.quot;
-		Temp[1]=Nom.rem;
-	}
+	Temp[0]+=(Temp[1]/Giga);
+	Temp[1]%=Giga;
 
 	return ((const struct timespec) { .tv_sec=(time_t)(Temp[0]),.tv_nsec=(long)(Temp[1]) });
 }
 static struct timespec TimP_Spec_Div_(const struct timespec A,const long Div)
 {
-	const long long Giga=+1000000000LL;
+	const long long Giga=+1000000000LL,Cast=(long long)(Div);
 	long long Temp[2]={[0]=(long long)(A.tv_sec),[1]=(long long)(A.tv_nsec)};
 
-	{
-		const long long Cast=(long long)(Div);
+	Temp[1]+=Giga*(Temp[0]%Cast);
 
-		Temp[0]%=Cast;
-		Temp[0]*=Giga;
+	Temp[0]/=Cast;
+	Temp[1]/=Cast;
 
-		Temp[1]+=Temp[0];
-		Temp[1]/=Cast;
-	}
-
-	return ((const struct timespec) { .tv_sec=A.tv_sec/((time_t)(Div)),.tv_nsec=(long)(Temp[1]) });
+	return ((const struct timespec) { .tv_sec=(time_t)(Temp[0]),.tv_nsec=(long)(Temp[1]) });
 }
 
 static double TimP_Spec_Get_(const struct timespec Spec)
 {
-	const double Nano=+1.0E-9,Cast[2]={[0]=(double)(Spec.tv_sec),[1]=(double)(Spec.tv_nsec)};
+	const double Nano=+1.0E-9;
+	double Temp[2]={[0]=(double)(Spec.tv_sec),[1]=(double)(Spec.tv_nsec)};
 
-	return fma(Nano,Cast[1],Cast[0]);
+	return Temp[0]+=Temp[1]*=Nano;
 }
 static struct timespec TimP_Spec_Set_(const double Double)
 {
 	const double Giga=+1.0E+9;
+	double Temp[2];
 
-	return ((const struct timespec) { .tv_sec=(time_t)(trunc(Double)),.tv_nsec=(long)(Giga*fmod(Double,+1.0)) });
+	Temp[1]=Double-(Temp[0]=trunc(Double));
+	Temp[1]*=Giga;
+
+	return ((const struct timespec) { .tv_sec=(time_t)(Temp[0]),.tv_nsec=(long)(Temp[1]) });
 }
 
 static struct timespec TimP_Spec_Current_(void)

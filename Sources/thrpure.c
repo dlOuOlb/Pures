@@ -2,24 +2,50 @@
 #include "thrpure.h"
 
 #if(1)
-typedef struct { _Alignas(void*) struct { thrp_p_ Proc_;size_t Size; }; }thrp_tp;
+typedef struct { _Alignas(max_align_t) struct { thrp_p_ Proc_;size_t Size; }; }thrp_tp;
 typedef const thrp_tp THRP_TP;
 
-struct _thrp_qu { _Alignas(void*) struct { mtx_t Lock,Wait;size_t Capacity,Count;thrp_tp *Pin[2];thrd_t Thread; }; };
-struct _thrp_mu { mtx_t Tex; };
+struct _thrp_qu
+{
+	_Alignas(max_align_t) struct
+	{
+		void(*Free_)(void *const restrict),*(*Alloc_)(void *const restrict,const size_t,const size_t);
+		mtx_t Lock,Wait;
+		size_t Capacity,Count;
+		thrp_tp *Pin[2];
+		thrd_t Thread;
+	};
+};
+struct _thrp_mu
+{
+	_Alignas(max_align_t) struct
+	{
+		void(*Free_)(void *const restrict);
+		mtx_t Tex;
+	};
+};
 #endif
 
 #if(1)
+static void _ThrP_UM_Return_(void *const restrict Memory) { free(Memory);return; }
+static void *_ThrP_UM_Borrow_(void *const restrict Owner,const size_t Align,const size_t Size) { (void)(Owner);return aligned_alloc(Align,Size); }
+
 static const struct
 {
 	_Alignas(16) const char Version[16];
-	const struct { const thrd_t Thread;THRP_TP TP; }Empty;
-	_Alignas(int) const struct _thrpack_flag Flag;
+	THRP_UM Handle;
+	const struct _thrpack_flag Flag;
 	const struct _thrpack_signal Signal;
+	const thrd_t Empty;
 }
 _Post=
 {
 	.Version=_INC_THRPURE,
+	.Handle=
+	{
+		.Return_=_ThrP_UM_Return_,
+		.Borrow_=_ThrP_UM_Borrow_
+	},
 	.Signal=
 	{
 		.Continue=true,
@@ -36,10 +62,9 @@ _Post=
 };
 static struct { mtx_t *const Qu,*const Mu; }_GLock={.Qu=&(mtx_t) { 0 },.Mu=&(mtx_t) { 0 }};
 
-static void *_ThrP_Malloc_(const size_t Size) { return aligned_alloc(sizeof(void*),Size); }
-static size_t _ThrP_Padding_(register size_t V) { const size_t T=sizeof(void*);V--;V+=T;V/=T;V*=T;return V; }
-static int _ThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&(_Post.Empty.Thread),sizeof(thrd_t)); }
-static void _ThrP_Empty_Thread_(thrd_t *const Thread) { memcpy(Thread,&(_Post.Empty.Thread),sizeof(thrd_t));return; }
+static size_t _ThrP_Padding_(register size_t V) { const size_t T=sizeof(max_align_t);V--;V+=T;V/=T;V*=T;return V; }
+static int _ThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&(_Post.Empty),sizeof(thrd_t)); }
+static void _ThrP_Empty_Thread_(thrd_t *const Thread) { memcpy(Thread,&(_Post.Empty),sizeof(thrd_t));return; }
 static int _ThrP_Flag_(register const int Flag,register const int Temp) { return ((Temp==thrd_success)?(Flag):(Temp)); }
 #endif
 
@@ -99,7 +124,10 @@ static void _ThrP_Qu_Nullify_(thrp_qu *const Qu)
 	thrp_tp *const restrict Take=_ThrP_Qu_Capable_(Qu,sizeof(thrp_tp));
 
 	if(Take)
-		*Take=_Post.Empty.TP;
+	{
+		Take->Proc_=NULL;
+		Take->Size=0;
+	}
 	else;
 
 	return;
@@ -272,7 +300,7 @@ NEW_STREAM:				Flag=thrd_create(&(Qu->Thread),_ThrP_Qu_Stream_,Qu);
 #endif
 
 #if(1)
-static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
+static int ThrP_Qu_Wait_(thrp_qu *const *const restrict Ptr)
 {
 	_ThrP_Qu_Init_();
 
@@ -313,7 +341,7 @@ static int ThrP_Qu_Wait_(thrp_qu *const *const Ptr)
 
 	return thrd_error;
 }
-static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const size_t Copy,const void *const Arg)
+static int ThrP_Qu_Push_(thrp_qu *const *const restrict Ptr,THRP_P_ Proc_,const size_t Copy,const void *const restrict Arg)
 {
 	_ThrP_Qu_Init_();
 
@@ -346,47 +374,53 @@ static int ThrP_Qu_Push_(thrp_qu *const *const Ptr,THRP_P_ Proc_,const size_t Co
 #endif
 
 #if(1)
-static int ThrP_Qu_Create_(thrp_qu **const Ptr,const size_t Space)
+static int ThrP_Qu_Create_(THRP_UM *const restrict UM,void *const restrict Owner,thrp_qu **const restrict Ptr,const size_t Space)
 {
 	_ThrP_Qu_Init_();
 
-	const size_t Size=_ThrP_Padding_(Space);
+	if((Ptr)&&(UM)&&(UM->Return_)&&(UM->Borrow_))
+	{
+		const size_t Size=_ThrP_Padding_(Space);
 
-	if(Size<sizeof(thrp_qu));
-	else if(Size<Space);
-	else if(mtx_lock(_GLock.Qu)==thrd_success)
-		if(*Ptr)
-			goto UNLOCK;
-		else
-		{
-			thrp_qu *const restrict Qu=_ThrP_Malloc_(Size);
-
-			if(Qu)
-				if(mtx_init(&(Qu->Lock),mtx_plain)==thrd_success)
-					if(mtx_init(&(Qu->Wait),mtx_plain)==thrd_success)
-					{
-						Qu->Capacity=Size-sizeof(thrp_qu);
-
-						_ThrP_Qu_Reset_(*Ptr=Qu);
-
-						return mtx_unlock(_GLock.Qu);
-					}
-					else
-						goto KILL_LOCK;
-				else
-					goto KILL_THIS;
-			else
+		if(Size<sizeof(thrp_qu));
+		else if(Size<Space);
+		else if(mtx_lock(_GLock.Qu)==thrd_success)
+			if(*Ptr)
 				goto UNLOCK;
+			else
+			{
+				thrp_qu *const restrict Qu=UM->Borrow_(Owner,_Alignof(max_align_t),Size);
 
-KILL_LOCK:	mtx_destroy(&(Qu->Lock));
-KILL_THIS:	free(Qu);
-UNLOCK:		mtx_unlock(_GLock.Qu);
-		}
+				if(Qu)
+					if(mtx_init(&(Qu->Lock),mtx_plain)==thrd_success)
+						if(mtx_init(&(Qu->Wait),mtx_plain)==thrd_success)
+						{
+							Qu->Free_=UM->Return_;
+							Qu->Alloc_=UM->Borrow_;
+							Qu->Capacity=Size-sizeof(thrp_qu);
+
+							_ThrP_Qu_Reset_(*Ptr=Qu);
+
+							return mtx_unlock(_GLock.Qu);
+						}
+						else
+							goto KILL_LOCK;
+					else
+						goto KILL_THIS;
+				else
+					goto UNLOCK;
+
+KILL_LOCK:		mtx_destroy(&(Qu->Lock));
+KILL_THIS:		UM->Return_(Qu);
+UNLOCK:			mtx_unlock(_GLock.Qu);
+			}
+		else;
+	}
 	else;
 
 	return thrd_error;
 }
-static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
+static int ThrP_Qu_Delete_(thrp_qu **const restrict Ptr)
 {
 	_ThrP_Qu_Init_();
 
@@ -402,7 +436,7 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 
 			mtx_destroy(Wait);
 			mtx_destroy(Lock);
-			free(Qu);
+			Qu->Free_(Qu);
 			*Ptr=NULL;
 
 			return _ThrP_Flag_(Flag,mtx_unlock(_GLock.Qu));
@@ -514,37 +548,40 @@ static int ThrP_Mu_Give_(thrp_mu *const *const Ptr,const _Bool Wait)
 #endif
 
 #if(1)
-static int ThrP_Mu_Create_(thrp_mu **const Ptr)
+static int ThrP_Mu_Create_(THRP_UM *const restrict UM,void *const restrict Owner,thrp_mu **const restrict Ptr)
 {
 	_ThrP_Mu_Init_();
 
-	if(mtx_lock(_GLock.Mu)==thrd_success)
-		if(*Ptr)
-			goto UNLOCK;
-		else
-		{
-			thrp_mu *const restrict Mu=_ThrP_Malloc_(sizeof(thrp_mu));
-
-			if(Mu)
-				if(mtx_init(&(Mu->Tex),mtx_plain)==thrd_success)
-				{
-					*Ptr=Mu;
-
-					return mtx_unlock(_GLock.Mu);
-				}
-				else
-					goto KILL_THIS;
-			else
+	if((Ptr)&&(UM)&&(UM->Return_)&&(UM->Borrow_))
+		if(mtx_lock(_GLock.Mu)==thrd_success)
+			if(*Ptr)
 				goto UNLOCK;
+			else
+			{
+				thrp_mu *const restrict Mu=UM->Borrow_(Owner,_Alignof(max_align_t),sizeof(thrp_mu));
 
-KILL_THIS:	free(Mu);
-UNLOCK:		mtx_unlock(_GLock.Mu);
-		}
+				if(Mu)
+					if(mtx_init(&(Mu->Tex),mtx_plain)==thrd_success)
+					{
+						Mu->Free_=UM->Return_;
+						*Ptr=Mu;
+
+						return mtx_unlock(_GLock.Mu);
+					}
+					else
+						goto KILL_THIS;
+				else
+					goto UNLOCK;
+
+KILL_THIS:		UM->Return_(Mu);
+UNLOCK:			mtx_unlock(_GLock.Mu);
+			}
+		else;
 	else;
 
 	return thrd_error;
 }
-static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
+static int ThrP_Mu_Delete_(thrp_mu **const restrict Ptr)
 {
 	_ThrP_Mu_Init_();
 
@@ -567,7 +604,7 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 					if(mtx_unlock(Mutex)==thrd_success)
 					{
 						mtx_destroy(Mutex);
-						free(Mu);
+						Mu->Free_(Mu);
 						*Ptr=NULL;
 
 						return _ThrP_Flag_(Flag,mtx_unlock(_GLock.Mu));
@@ -639,63 +676,6 @@ static _Bool ThrP_Thread_Print_(const void *const _) { return (puts(_)>=0); }
 #endif
 
 #if(1)
-static int _ThrP_Event_Thread_(void *const Pass)
-{
-	thrp_tp *const restrict Task=Pass;
-	const void *const Arg=(Task->Size)?(Task+1):(NULL);
-	const _Bool Signal=Task->Proc_(Arg);
-
-	free(Task);
-
-	return ((Signal)?(EXIT_SUCCESS):(EXIT_FAILURE));
-}
-static int _ThrP_Event_Launch_(thrp_tp *const Task)
-{
-	thrd_t Thread;
-	int Flag=thrd_create(&Thread,_ThrP_Event_Thread_,Task);
-
-	if(Flag==thrd_success)
-		Flag=thrd_detach(Thread);
-	else
-		free(Task);
-
-	return Flag;
-}
-static int ThrP_Event_Invoke_(THRP_P_ Proc_,const size_t Copy,const void *const Arg)
-{
-	if(Proc_)
-	{
-		const size_t Size=_ThrP_Padding_(Copy);
-		const size_t Pack=Size+sizeof(thrp_tp);
-
-		if(Size<Copy);
-		else if(Pack<Size);
-		else
-		{
-			thrp_tp *const restrict Hold=_ThrP_Malloc_(Pack);
-
-			if(Hold)
-			{
-				Hold->Proc_=Proc_;
-				Hold->Size=Size;
-
-				if(Copy)
-					memcpy(Hold+1,Arg,Copy);
-				else;
-
-				return _ThrP_Event_Launch_(Hold);
-			}
-			else
-				return thrd_nomem;
-		}
-	}
-	else;
-
-	return thrd_error;
-}
-#endif
-
-#if(1)
 _Static_assert(sizeof(THRPACK)==(sizeof(THRPACE)<<4),"sizeof(THRPACK) != 16*sizeof(THRPACE)");
 extern _Alignas(THRPACK) THRPACK ThrP=
 {
@@ -703,13 +683,13 @@ extern _Alignas(THRPACK) THRPACK ThrP=
 		.Version=_Post.Version,
 		.Signal=&(_Post.Signal),
 		.Flag=&(_Post.Flag),
-		.Event.Invoke_=ThrP_Event_Invoke_
+		.UM=&(_Post.Handle)
 	},
 	.Task=
 	{
-		.Sleep_=ThrP_Thread_Sleep_,
 		.Yield_=ThrP_Thread_Yield_,
 		.Break_=ThrP_Thread_Break_,
+		.Sleep_=ThrP_Thread_Sleep_,
 		.Print_=ThrP_Thread_Print_
 	},
 	.Qu=
