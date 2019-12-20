@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+﻿cmake_minimum_required(VERSION 3.0)
 project(Pures)
 
 # Settings
@@ -23,7 +23,7 @@ target_compile_options(${NAME} PUBLIC ${OPT_COMPILE})
 
 # StrPure
 set(NAME strpure)
-add_library(${NAME} STATIC ${DIR_SRC}/${NAME}.c ${DIR_SRC}/strpain.c)
+add_library(${NAME} STATIC ${DIR_SRC}/${NAME}.c)
 target_include_directories(${NAME} PUBLIC ${DIR_INC})
 target_compile_options(${NAME} PUBLIC ${OPT_COMPILE})
 
