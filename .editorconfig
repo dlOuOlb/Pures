@@ -1,12 +1,6 @@
-root=true
+﻿root=true
 
-[*.md]
-indent_style=space
-indent_size=2
-insert_final_newline=true
-charset=utf-8
-
-[*.{h,c,def,txt}]
+[*.{h,c,def,txt,md}]
 indent_style=tab
 indent_size=4
 insert_final_newline=true
