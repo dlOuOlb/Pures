@@ -2,24 +2,24 @@
 
 ## Build Guide
 
-A standard C18 compiler (with thread and safety support) is required. For the more details, see [headers](./Headers) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers).
+A standard C18 compiler (with thread and safety support) is required. For the more details, see the library headers.
 
-### Sources
+### [Headers](./Headers) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers)
 
-- strpure.c
-- thrpure.c
-- timpure.c
+- [strpure.h](./Headers/strpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/strpure.h)
+- [thrpure.h](./Headers/thrpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/thrpure.h)
+- [timpure.h](./Headers/timpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/timpure.h)
 
-Do not build below files directly, which are a private header and a template. Just put them in the same folder with above files.
+### [Sources](./Sources) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources)
 
-- stdpain.h
-- strpain.c
+- [strpure.c](./Sources/strpure.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/strpure.c)
+- [thrpure.c](./Sources/thrpure.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/thrpure.c)
+- [timpure.c](./Sources/timpure.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/timpure.c)
 
-### Headers
+Do not build the below files directly, which are a private header and a template. Just put them in the same folder with the above files.
 
-- strpure.h
-- thrpure.h
-- timpure.h
+- [stdpain.h](./Sources/stdpain.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/stdpain.h)
+- [strpain.c](./Sources/strpain.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/strpain.c)
 
 ## Library Usage
 
@@ -29,7 +29,7 @@ Do not build below files directly, which are a private header and a template. Ju
 
 For the more detailed example, see [this](./Mains/threading.c) [#](http://github.com/dlOuOlb/Pures/blob/master/Mains/threading.c).
 
-##### Task Queue Creation and Deletion
+##### ThrP_Qu: Creation and Deletion
 
 ```c
 //assign null, specifying it is not initialized
@@ -52,7 +52,7 @@ Flag = ThrP.Qu.Delete_( &Qu );
 /* handle the possible error */
 ```
 
-##### Task Queue Enqueueing and Synchronization
+##### ThrP_Qu: Enqueueing and Synchronization
 
 ```c
 //enqueue a user task A into the queue A
@@ -72,7 +72,7 @@ Flag = ThrP.Qu.Wait_( &QuB );
 
 #### Mutex Examples
 
-##### Mutex Creation and Deletion
+##### ThrP_Mu: Creation and Deletion
 
 ```c
 //assign null, specifying it is not initialized
@@ -91,7 +91,7 @@ Flag = ThrP.Mu.Delete_( &Mu );
 /* handle the possible error */
 ```
 
-##### Mutex Locking and Unlocking
+##### ThrP_Mu: Locking and Unlocking
 
 ```c
 //wait and lock
