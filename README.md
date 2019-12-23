@@ -6,9 +6,9 @@ A standard C18 compiler (with thread and safety support) is required. For the mo
 
 ### [Headers](./Headers) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers)
 
-- [strpure.h](./Headers/strpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/strpure.h)
-- [thrpure.h](./Headers/thrpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/thrpure.h)
-- [timpure.h](./Headers/timpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/timpure.h)
+- [strpure.h](./Headers/strpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/strpure.h) - about inflexible string
+- [thrpure.h](./Headers/thrpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/thrpure.h) - about task queue
+- [timpure.h](./Headers/timpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/timpure.h) - about time value
 
 ### [Sources](./Sources) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources)
 
