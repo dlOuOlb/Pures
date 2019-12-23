@@ -2,7 +2,7 @@
 
 ## Build Guide
 
-A standard C18 compiler (with thread and safety support) is required. For the more details, see [headers](./Headers).
+A standard C18 compiler (with thread and safety support) is required. For the more details, see [headers](./Headers) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers).
 
 ### Sources
 
@@ -27,11 +27,11 @@ Do not build below files directly, which are a private header and a template. Ju
 
 #### Task Queue Examples
 
-For the more detailed example, see [this](./Mains/threading.c).
+For the more detailed example, see [this](./Mains/threading.c) [#](http://github.com/dlOuOlb/Pures/blob/master/Mains/threading.c).
 
-##### Creation and Deletion
+##### Task Queue Creation and Deletion
 
-```C
+```c
 //assign null, specifying it is not initialized
 thrp_qu *Qu = NULL;
 
@@ -52,9 +52,9 @@ Flag = ThrP.Qu.Delete_( &Qu );
 /* handle the possible error */
 ```
 
-##### Enqueue and Synchronize
+##### Task Queue Enqueueing and Synchronization
 
-```C
+```c
 //enqueue a user task A into the queue A
 Flag = ThrP.Qu.Push_( &QuA, User_Task_Func_A_, sizeof( UserTaskArgA ), &UserTaskArgA );
 /* handle the possible error */
@@ -72,9 +72,9 @@ Flag = ThrP.Qu.Wait_( &QuB );
 
 #### Mutex Examples
 
-##### Creation and Deletion
+##### Mutex Creation and Deletion
 
-```C
+```c
 //assign null, specifying it is not initialized
 thrp_mu *Mu = NULL;
 
@@ -91,9 +91,9 @@ Flag = ThrP.Mu.Delete_( &Mu );
 /* handle the possible error */
 ```
 
-##### Lock and Unlock
+##### Mutex Locking and Unlocking
 
-```C
+```c
 //wait and lock
 Flag = ThrP.Mu.Take_( &Mu, true );
 /* handle the possible error */
