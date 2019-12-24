@@ -56,11 +56,11 @@ Flag = ThrP.Qu.Delete_( &Qu );
 
 ```c
 //enqueue a user task A into the queue A
-Flag = ThrP.Qu.Push_( &QuA, User_Task_Func_A_, sizeof( UserTaskArgA ), &UserTaskArgA );
+Flag = ThrP.Qu.Push_( &QuA, User_Func_A_, sizeof( UserArgA ), &UserArgA );
 /* handle the possible error */
 
 //enqueue a user task B into the queue B
-Flag = ThrP.Qu.Push_( &QuB, User_Task_Func_B_, sizeof( UserTaskArgB ), &UserTaskArgB );
+Flag = ThrP.Qu.Push_( &QuB, User_Func_B_, sizeof( UserArgB ), &UserArgB );
 /* handle the possible error */
 
 //synchronize the queues
