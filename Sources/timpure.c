@@ -5,11 +5,11 @@
 static const struct
 {
 	_Alignas(16) const char Version[16];
-	const struct _timpack_size Size;
+	const struct otimpack_size Size;
 }
-_Post=
+xPost=
 {
-	.Version=_INC_TIMPURE,
+	.Version=oINC_TIMPURE,
 	.Size=
 	{
 		.Size=sizeof(size_t),
@@ -40,7 +40,7 @@ static timp_tx TimP_Textual_(const time_t Time)
 {
 	timp_tx Text;
 
-	if(ctime_s(Text.Text,sizeof(Text),&Time));
+	if(ctime_s(Text.Tx,sizeof(Text),&Time));
 	else;
 
 	return Text;
@@ -51,7 +51,7 @@ static timp_tx TimP_TM_Textual_(const struct tm Time)
 {
 	timp_tx Text;
 
-	if(asctime_s(Text.Text,sizeof(Text),&Time));
+	if(asctime_s(Text.Tx,sizeof(Text),&Time));
 	else;
 
 	return Text;
@@ -59,7 +59,7 @@ static timp_tx TimP_TM_Textual_(const struct tm Time)
 #endif
 
 #if(1)
-static struct timespec _TimP_Spec_Carry_(struct timespec A)
+static struct timespec xTimP_Spec_Carry_(struct timespec A)
 {
 	const long Giga=+1000000000L;
 
@@ -79,8 +79,8 @@ static struct timespec _TimP_Spec_Carry_(struct timespec A)
 
 	return A;
 }
-static struct timespec TimP_Spec_Add_(const struct timespec A,const struct timespec B) { return _TimP_Spec_Carry_((const struct timespec) { .tv_sec=A.tv_sec+B.tv_sec,.tv_nsec=A.tv_nsec+B.tv_nsec }); }
-static struct timespec TimP_Spec_Sub_(const struct timespec A,const struct timespec B) { return _TimP_Spec_Carry_((const struct timespec) { .tv_sec=A.tv_sec-B.tv_sec,.tv_nsec=A.tv_nsec-B.tv_nsec }); }
+static struct timespec TimP_Spec_Add_(const struct timespec A,const struct timespec B) { return xTimP_Spec_Carry_((const struct timespec) { .tv_sec=A.tv_sec+B.tv_sec,.tv_nsec=A.tv_nsec+B.tv_nsec }); }
+static struct timespec TimP_Spec_Sub_(const struct timespec A,const struct timespec B) { return xTimP_Spec_Carry_((const struct timespec) { .tv_sec=A.tv_sec-B.tv_sec,.tv_nsec=A.tv_nsec-B.tv_nsec }); }
 
 static struct timespec TimP_Spec_Mul_(const struct timespec A,const long Mul)
 {
@@ -148,8 +148,8 @@ extern _Alignas(TIMPACK) TIMPACK TimP=
 {
 	{
 		{
-			.Version=_Post.Version,
-			.Size=&(_Post.Size)
+			.Version=xPost.Version,
+			.Size=&(xPost.Size)
 		},
 		.Val=
 		{
