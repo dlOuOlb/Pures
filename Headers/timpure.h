@@ -1,5 +1,5 @@
-﻿#ifndef oINC_TIMPURE
-#define oINC_TIMPURE "TimP:2019.12.24"
+﻿#ifndef oTIMPURE_INC
+#define oTIMPURE_INC "TimP:2019.12.27"
 /*------------------------------------------------------------------+
 |	TimPure provides some time representing functions.				|
 |																	|
@@ -11,7 +11,7 @@
 |	- All data pointers have the same size, a power of 2.			|
 |	- All function pointers have the same size, a power of 2.		|
 +-------------------------------------------------------------------+
-|	[+] Pre-Header Definitions:										|
+|	[+] Optional Pre-Header Definitions:							|
 |																	|
 |	#define uPURES_DLL_IMPORT_ __declspec(dllimport)				|
 |	#define uTIMP_MACRO_DEFINE_										|
@@ -20,7 +20,7 @@
 |																	|
 |	Functions of this library do not take pointers but values, so	|
 |	the interface mismatch such as type or call between the build	|
-|	and the usage may cause an unintended behavior.					|
+|	and the usage could cause an unintended behavior.				|
 +------------------------------------------------------------------*/
 
 #include <time.h>
@@ -29,7 +29,7 @@
 typedef struct { char Tx[32]; }timp_tx;typedef const timp_tx TIMP_TX;
 
 //TimPure : Library Alignment Union
-typedef const union { const size_t S;const void *const D;void(*const F_)(void); }TIMPACE;
+typedef const union { const size_t S;const void *const X;void(*const X_)(void); }TIMPACE;
 
 //TimPure : Library Pack Structure
 typedef const struct
@@ -125,7 +125,7 @@ typedef const struct
 			//TimPure : Conversion from Double to Time Specification
 			xTimP_Align_(1) struct timespec(*const Set_)(const double Double);
 			//TimPure : Get the current calendar time specification in UTC.
-			//＊Return object is { .tv_sec = 0, .tv_nsec = -1L } for failure.
+			//＊Return object is { .tv_sec = (time_t)(-1), .tv_nsec = (long)(-1L) } for failure.
 			xTimP_Align_(1) struct timespec(*const Now_)(void);
 			//TimPure : Calculate ( Sum + ( Now_( ) - Mark ) ).
 			xTimP_Align_(1) struct timespec(*const Sum_)(const struct timespec Sum,const struct timespec Mark);
@@ -154,8 +154,14 @@ extern TIMPACK *TimP_(void);
 #define TimP_Text_Obj_Now_() TimP.Text.Obj_(TimP.Obj.Now_())
 //TimPure : Abbreviation of a once-loop over "TimP.Spec.Now_" and "TimP.Spec.Sum_".
 //＊Do not jump over the loop block, e.g. 'goto', 'break', and 'return'.
-//＊Note that identifiers x(TimeSpec)Mark and x(TimeSpec)Temp are locally defined.
-#define TimP_Spec_Run_Do_(TimeSpec) for(const struct timespec(x##TimeSpec##Mark)=TimP.Spec.Now_(),*(x##TimeSpec##Temp)=&(x##TimeSpec##Mark);(x##TimeSpec##Temp);(TimeSpec)=TimP.Spec.Sum_((TimeSpec),(x##TimeSpec##Mark)),(x##TimeSpec##Temp)=NULL)
+#define TimP_Spec_Run_Do_(TimeSpec) for(const struct timespec(xTimP_Temp_(Mark))=TimP.Spec.Now_(),*(xTimP_Temp_(Coin))=&(xTimP_Temp_(Mark));(xTimP_Temp_(Coin));(TimeSpec)=TimP.Spec.Sum_((TimeSpec),(xTimP_Temp_(Mark))),(xTimP_Temp_(Coin))=NULL)
+
+//TimPure : Macro for naming.
+#define xTimP_Temp_(Var) xTimP_Temp_Wrap_(xTimP,Var,__LINE__)
+//TimPure : Macro for expansion.
+#define xTimP_Temp_Wrap_(Prefix,Name,Suffix) xTimP_Temp_Conc_(Prefix,Name,Suffix)
+//TimPure : Macro for concatenation.
+#define xTimP_Temp_Conc_(Prefix,Name,Suffix) Prefix##Name##Suffix
 #endif
 
 #endif

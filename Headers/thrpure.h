@@ -1,5 +1,5 @@
-﻿#ifndef oINC_THRPURE
-#define oINC_THRPURE "ThrP:2019.12.24"
+﻿#ifndef oTHRPURE_INC
+#define oTHRPURE_INC "ThrP:2019.12.27"
 /*------------------------------------------------------------------+
 |	ThrPure provides some simple thread managing functions.			|
 |																	|
@@ -11,7 +11,7 @@
 |	- All data pointers have the same size, a power of 2.			|
 |	- All function pointers have the same size, a power of 2.		|
 +-------------------------------------------------------------------+
-|	[+] Pre-Header Definitions:										|
+|	[+] Optional Pre-Header Definitions:							|
 |																	|
 |	#define uPURES_DLL_IMPORT_ __declspec(dllimport)				|
 |	#define uTHRP_MACRO_DEFINE_										|
@@ -26,13 +26,13 @@ typedef struct { void(*Return_)(void *const Memory),*(*Borrow_)(void *const Owne
 typedef _Bool(*thrp_p_)(const void *const Arg);typedef const thrp_p_ THRP_P_;
 
 //ThrPure : Task Queue
-typedef struct xthrp_qu thrp_qu;typedef const thrp_qu THRP_QU;
+typedef struct othrp_qu thrp_qu;typedef const thrp_qu THRP_QU;
 
 //ThrPure : Mutex Holder
-typedef struct xthrp_mu thrp_mu;typedef const thrp_mu THRP_MU;
+typedef struct othrp_mu thrp_mu;typedef const thrp_mu THRP_MU;
 
 //ThrPure : Library Alignment Union
-typedef const union { const size_t S;const void *const D;void(*const F_)(void); }THRPACE;
+typedef const union { const size_t S;const void *const X;void(*const X_)(void); }THRPACE;
 
 //ThrPure : Library Pack Structure
 typedef const struct
@@ -179,8 +179,14 @@ extern THRPACK *ThrP_(void);
 #define ThrP_Qu_Push_(Queue,Proc_,TYPE,...) ThrP.Qu.Push_((Queue),(Proc_),sizeof(TYPE),&(TYPE){__VA_ARGS__})
 //ThrPure : Abbreviation of a once-loop over "ThrP.Mu.Take_" and "ThrP.Mu.Give_".
 //＊Do not jump over the loop block, e.g. 'goto', 'break', and 'return'.
-//＊Note that an identifier x(Ret) is locally defined.
-#define ThrP_Mu_Lock_Do_(Ret,Mutex) for(_Bool(x##Ret)=(((Ret)=ThrP.Mu.Take_((Mutex),1))==ThrP.Flag->Success);(x##Ret);(Ret)=(ThrP.Mu.Give_((Mutex),(x##Ret)=0)==(ThrP.Flag->Busy))?(ThrP.Flag->Success):(ThrP.Flag->Error))
+#define ThrP_Mu_Lock_Do_(Ret,Mutex) for(_Bool(xThrP_Temp_(Flag))=(((Ret)=ThrP.Mu.Take_((Mutex),1))==ThrP.Flag->Success);(xThrP_Temp_(Flag));(Ret)=(ThrP.Mu.Give_((Mutex),(xThrP_Temp_(Flag))=0)==(ThrP.Flag->Busy))?(ThrP.Flag->Success):(ThrP.Flag->Error))
+
+//ThrPure : Macro for naming.
+#define xThrP_Temp_(Var) xThrP_Temp_Wrap_(xThrP,Var,__LINE__)
+//ThrPure : Macro for expansion.
+#define xThrP_Temp_Wrap_(Prefix,Name,Suffix) xThrP_Temp_Conc_(Prefix,Name,Suffix)
+//ThrPure : Macro for concatenation.
+#define xThrP_Temp_Conc_(Prefix,Name,Suffix) Prefix##Name##Suffix
 #endif
 
 #endif
