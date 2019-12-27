@@ -5,7 +5,7 @@
 typedef struct { _Alignas(max_align_t) struct { thrp_p_ Proc_;size_t Size; }; }thrp_tp;
 typedef const thrp_tp THRP_TP;
 
-struct xthrp_qu
+struct othrp_qu
 {
 	_Alignas(max_align_t) struct
 	{
@@ -16,7 +16,7 @@ struct xthrp_qu
 		thrd_t Thread;
 	};
 };
-struct xthrp_mu
+struct othrp_mu
 {
 	_Alignas(max_align_t) struct
 	{
@@ -40,7 +40,7 @@ static const struct
 }
 xPost=
 {
-	.Version=oINC_THRPURE,
+	.Version=oTHRPURE_INC,
 	.Handle=
 	{
 		.Return_=xThrP_UM_Return_,

@@ -1,39 +1,22 @@
-﻿#ifndef xSRC_STDPAIN
-#define xSRC_STDPAIN
+﻿#ifndef xSTDPAIN_SRC
+#define xSTDPAIN_SRC
 
-#ifdef __STDC__
+#if(defined(__STDC__)&&(__STDC__))
 
-#if(__STDC__)
+#if(defined(__STDC_VERSION__)&&(__STDC_VERSION__>=201710L))
 
-#ifdef __STDC_VERSION__
+//#if(defined(__STDC_VERSION_STDINT_H__)&&(__STDC_VERSION_STDINT_H__>=yyyymmL))
 
-#if(__STDC_VERSION__<201710L)
-#error The implementation does not satisfy the C18 Standard.
+//#if(defined(__STDC_VERSION_STDLIB_H__)&&(__STDC_VERSION_STDLIB_H__>=yyyymmL))
+
+//#if(defined(__STDC_VERSION_TIME_H__)&&(__STDC_VERSION_TIME_H__>=yyyymmL))
+
+#if(defined(__STDC_LIB_EXT1__)&&(__STDC_LIB_EXT1__>=201112L))
+
+#if(defined(__STDC_NO_THREADS__)&&(__STDC_NO_THREADS__))
+#error The implementation does not support multithreading.
 #else
 
-//#ifdef __STDC_VERSION_STDINT_H__
-
-//#if(__STDC_VERSION_STDINT_H__<yyyymmL)
-//#error The implementation does not satisfy the C2x Standard <stdint.h>.
-//#else
-
-//#ifdef __STDC_VERSION_STDLIB_H__
-
-//#if(__STDC_VERSION_STDLIB_H__<yyyymmL)
-//#error The implementation does not satisfy the C2x Standard <stdlib.h>.
-//#else
-
-//#ifdef __STDC_VERSION_TIME_H__
-
-//#if(__STDC_VERSION_TIME_H__<yyyymmL)
-//#error The implementation does not satisfy the C2x Standard <time.h>.
-//#else
-
-#ifdef __STDC_NO_THREADS__
-#error The implementation does not support <threads.h>.
-#else
-
-#ifdef __STDC_LIB_EXT1__
 #define __STDC_WANT_LIB_EXT1__ (1)
 
 #include <errno.h>
@@ -47,42 +30,30 @@
 #include <threads.h>
 #include <time.h>
 
+#endif
+
 #else
-#error The implementation does not support the C Library Extension 1.
+#error The implementation does not support the C11 bounds-checking interfaces.
 #endif
 
-#endif
-
+//#else
+//#error The implementation does not support the standard C2x <time.h>.
 //#endif
 
 //#else
-//#error The implementation does not specify the C Standard <time.h> version number.
-//#endif
-
-//#endif
-
-//#else
-//#error The implementation does not specify the C Standard <stdlib.h> version number.
-//#endif
-
+//#error The implementation does not support the standard C2x <stdlib.h>.
 //#endif
 
 //#else
-//#error The implementation does not specify the C Standard <stdint.h> version number.
+//#error The implementation does not support the standard C2x <stdint.h>.
 //#endif
 
+#else
+#error The implementation does not support the standard C18.
 #endif
 
 #else
-#error The implementation does not specify the C Standard version number.
-#endif
-
-#else
-#error The implementation does not conform to the C Standard.
-#endif
-
-#else
-#error The implementation does not conform to the C Standard.
+#error The implementation does not conform to the standard C.
 #endif
 
 #endif

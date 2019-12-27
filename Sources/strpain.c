@@ -1,5 +1,5 @@
-﻿#ifdef oINC_STRPURE
-#ifdef xSRC_STRPAIN
+﻿#ifdef oSTRPURE_INC
+#ifdef xSTRPAIN_SRC
 
 static size_t Punc_(Length)(TT_XXXX *const Str) { return xStrP_Length_(Str->TT,OxXXXX); }
 static size_t Punc_(Find)(TT_XXXX *const Str,TT_UNIT Char,const _Bool Mode)
@@ -69,7 +69,7 @@ static _Bool Punc_(Gets)(FILE *const restrict Stream,tt_xxxx *const restrict Str
 #define TT_XXXX Conc_(TT_UNIT,Conc_(_0X,XXXX))
 #endif
 
-#define xSRC_STRPAIN
+#define xSTRPAIN_SRC
 
 #if(1)
 #define tt nc
@@ -110,7 +110,7 @@ static _Bool Punc_(Gets)(FILE *const restrict Stream,tt_xxxx *const restrict Str
 #undef tt
 #endif
 
-#undef xSRC_STRPAIN
+#undef xSTRPAIN_SRC
 
 #if(1)
 #undef TT_XXXX

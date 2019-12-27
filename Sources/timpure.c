@@ -9,7 +9,7 @@ static const struct
 }
 xPost=
 {
-	.Version=oINC_TIMPURE,
+	.Version=oTIMPURE_INC,
 	.Size=
 	{
 		.Size=sizeof(size_t),
@@ -40,8 +40,7 @@ static timp_tx TimP_Textual_(const time_t Time)
 {
 	timp_tx Text;
 
-	if(ctime_s(Text.Tx,sizeof(Text),&Time));
-	else;
+	if(ctime_s(Text.Tx,sizeof(Text),&Time));else;
 
 	return Text;
 }
@@ -51,8 +50,7 @@ static timp_tx TimP_TM_Textual_(const struct tm Time)
 {
 	timp_tx Text;
 
-	if(asctime_s(Text.Tx,sizeof(Text),&Time));
-	else;
+	if(asctime_s(Text.Tx,sizeof(Text),&Time));else;
 
 	return Text;
 }
@@ -64,17 +62,19 @@ static struct timespec xTimP_Spec_Carry_(struct timespec A)
 	const long Giga=+1000000000L;
 
 	{
+		A.tv_sec+=(time_t)(A.tv_nsec/Giga);
+		A.tv_nsec%=Giga;
+	}
+	{
 		const time_t Zero=(time_t)(0);
 		const long Sign=(A.tv_sec>Zero)-(A.tv_sec<Zero);
 
-		A.tv_nsec+=Sign*Giga;
 		A.tv_sec-=(time_t)(Sign);
+		A.tv_nsec+=Sign*Giga;
 	}
 	{
-		const long Quot=A.tv_nsec/Giga;
-
+		A.tv_sec+=(time_t)(A.tv_nsec/Giga);
 		A.tv_nsec%=Giga;
-		A.tv_sec+=(time_t)(Quot);
 	}
 
 	return A;
@@ -133,7 +133,7 @@ static struct timespec TimP_Spec_Current_(void)
 	if(timespec_get(&Time,TIME_UTC));
 	else
 	{
-		Time.tv_sec=0;
+		Time.tv_sec=(time_t)(-1);
 		Time.tv_nsec=-1L;
 	}
 

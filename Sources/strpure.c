@@ -17,7 +17,7 @@ static const struct
 }
 xPost=
 {
-	.Version=oINC_STRPURE,
+	.Version=oSTRPURE_INC,
 	.Bool=
 	{
 		.Success=true,
