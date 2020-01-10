@@ -32,22 +32,22 @@ For the more detailed example, see [this](./Mains/threading.c) [#](http://github
 ##### ThrP_Qu: Creation and Deletion
 
 ```c
-//assign null, specifying it is not initialized
+// assign null, specifying it needs to be allocated
 thrp_qu *Qu = NULL;
 
-//allocate 1KB with the default allocater
+// allocate 1KB with the default allocater
 int Flag = ThrP.Qu.Create_( ThrP.UM, NULL, &Qu, 1024 );
 
-//handle the possible error, e.g.
-//if( Flag == ThrP.Flag->Success ); else return EXIT_FAILURE;
+// handle the possible error, e.g.
+// if( Flag == ThrP.Flag->Success ); else return EXIT_FAILURE;
 
 /* do your job... */
 
-//wait for all tasks to be processed
+// wait for all tasks to be processed
 Flag = ThrP.Qu.Wait_( &Qu );
 /* handle the possible error */
 
-//deallocate the space
+// deallocate the space
 Flag = ThrP.Qu.Delete_( &Qu );
 /* handle the possible error */
 ```
@@ -55,15 +55,15 @@ Flag = ThrP.Qu.Delete_( &Qu );
 ##### ThrP_Qu: Enqueueing and Synchronization
 
 ```c
-//enqueue a user task A into the queue A
+// enqueue a user task A into the queue A
 Flag = ThrP.Qu.Push_( &QuA, User_Func_A_, sizeof( UserArgA ), &UserArgA );
 /* handle the possible error */
 
-//enqueue a user task B into the queue B
+// enqueue a user task B into the queue B
 Flag = ThrP.Qu.Push_( &QuB, User_Func_B_, sizeof( UserArgB ), &UserArgB );
 /* handle the possible error */
 
-//synchronize the queues
+// synchronize the queues
 Flag = ThrP.Qu.Wait_( &QuA );
 /* handle the possible error */
 Flag = ThrP.Qu.Wait_( &QuB );
@@ -75,18 +75,18 @@ Flag = ThrP.Qu.Wait_( &QuB );
 ##### ThrP_Mu: Creation and Deletion
 
 ```c
-//assign null, specifying it is not initialized
+// assign null, specifying it needs to be allocated
 thrp_mu *Mu = NULL;
 
-//allocate the space with the default allocater
+// allocate the space with the default allocater
 int Flag = ThrP.Mu.Create_( ThrP.UM, NULL, &Mu );
 
-//handle the possible error, e.g.
-//if( Flag == ThrP.Flag->Success ); else return EXIT_FAILURE;
+// handle the possible error, e.g.
+// if( Flag == ThrP.Flag->Success ); else return EXIT_FAILURE;
 
 /* do your job... */
 
-//deallocate the space
+// deallocate the space
 Flag = ThrP.Mu.Delete_( &Mu );
 /* handle the possible error */
 ```
@@ -94,14 +94,22 @@ Flag = ThrP.Mu.Delete_( &Mu );
 ##### ThrP_Mu: Locking and Unlocking
 
 ```c
-//wait and lock
+// wait and lock
 Flag = ThrP.Mu.Take_( &Mu, true );
 /* handle the possible error */
 
-//mutate the state
+// mutate the state
 UserObj->Num++;
 
-//unlock without waiting
+// unlock without waiting
 Flag = ThrP.Mu.Give_( &Mu, false );
 /* handle the possible error */
+```
+
+Or just simply, with an abusive [macro](./Headers/thrpure.h#L181-L182) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/thrpure.h#L181-L182)
+
+```c
+// wait, lock, do, unlock
+ThrP_Mu_Lock_Do_( Flag, &Mu )
+	UserObj->Num++;
 ```
