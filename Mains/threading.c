@@ -21,7 +21,7 @@ static_assert(sizeof(void*)==sizeof(void(*)(void)),"");
 static _Bool My_Process_(const void *const);//function for task example
 typedef const struct { const int Period,Repeat;const char Msg[32]; }MY_TASK;//task argument holder
 
-int main(void)
+extern int main(void)
 #define My_Do_(Flag,Oper) do{if((Flag)==(ThrP.Flag->Success))(Flag)=(Oper);else return(EXIT_FAILURE);}while(0)
 {
 	const size_t QueueSpace=1<<10;//internal queue space - 1KB
