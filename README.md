@@ -6,20 +6,20 @@ A standard C18 compiler (with thread and safety support) is required. For the mo
 
 ### [Headers](./Headers) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers)
 
-- [strpure.h](./Headers/strpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/strpure.h) - about inflexible string
-- [thrpure.h](./Headers/thrpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/thrpure.h) - about task queue
-- [timpure.h](./Headers/timpure.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/timpure.h) - about time value
+- [strpure.h](./Headers/strpure.h) [#](http://github.com/dlOuOlb/Pures/blob/master/Headers/strpure.h) - about inflexible string
+- [thrpure.h](./Headers/thrpure.h) [#](http://github.com/dlOuOlb/Pures/blob/master/Headers/thrpure.h) - about task queue
+- [timpure.h](./Headers/timpure.h) [#](http://github.com/dlOuOlb/Pures/blob/master/Headers/timpure.h) - about time value
 
 ### [Sources](./Sources) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources)
 
-- [strpure.c](./Sources/strpure.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/strpure.c)
-- [thrpure.c](./Sources/thrpure.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/thrpure.c)
-- [timpure.c](./Sources/timpure.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/timpure.c)
+- [strpure.c](./Sources/strpure.c) [#](http://github.com/dlOuOlb/Pures/blob/master/Sources/strpure.c)
+- [thrpure.c](./Sources/thrpure.c) [#](http://github.com/dlOuOlb/Pures/blob/master/Sources/thrpure.c)
+- [timpure.c](./Sources/timpure.c) [#](http://github.com/dlOuOlb/Pures/blob/master/Sources/timpure.c)
 
 Do not build the below files directly, which are a private header and a template. Just put them in the same folder with the above files.
 
-- [stdpain.h](./Sources/stdpain.h) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/stdpain.h)
-- [strpain.c](./Sources/strpain.c) [#](http://github.com/dlOuOlb/Pures/tree/master/Sources/strpain.c)
+- [stdpain.h](./Sources/stdpain.h) [#](http://github.com/dlOuOlb/Pures/blob/master/Sources/stdpain.h)
+- [strpain.c](./Sources/strpain.c) [#](http://github.com/dlOuOlb/Pures/blob/master/Sources/strpain.c)
 
 ## Library Usage
 
@@ -106,7 +106,7 @@ Flag = ThrP.Mu.Give_( &Mu, false );
 /* handle the possible error */
 ```
 
-Or just simply, with an abusive [macro](./Headers/thrpure.h#L180-L182) [#](http://github.com/dlOuOlb/Pures/tree/master/Headers/thrpure.h#L180-L182)
+Or just simply, with an abusive [macro](./Headers/thrpure.h#L180-L182) [#](http://github.com/dlOuOlb/Pures/blob/master/Headers/thrpure.h#L180-L182)
 
 ```c
 // wait, lock, do, unlock
