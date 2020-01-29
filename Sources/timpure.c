@@ -1,7 +1,6 @@
 ﻿#include "stdpain.h"
 #include "timpure.h"
 
-#if(1)
 static const struct
 {
 	_Alignas(16) const char Version[16];
@@ -9,7 +8,7 @@ static const struct
 }
 xPost=
 {
-	.Version=oTIMPURE_INC,
+	.Version=oTIMPURE_INC_,
 	.Size=
 	{
 		.Size=sizeof(size_t),
@@ -20,7 +19,6 @@ xPost=
 		.TimeSpec=sizeof(struct timespec)
 	}
 };
-#endif
 
 #if(1)
 static struct tm TimP_Cast_Obj_Val_(const time_t Val)
@@ -142,9 +140,8 @@ static struct timespec TimP_Spec_Current_(void)
 static struct timespec TimP_Spec_Sum_(const struct timespec Sum,const struct timespec Mark) { return TimP_Spec_Add_(Sum,TimP_Spec_Sub_(TimP_Spec_Current_(),Mark)); }
 #endif
 
-#if(1)
 _Static_assert(sizeof(TIMPACK)==(sizeof(TIMPACE)<<4),"sizeof(TIMPACK) != 16*sizeof(TIMPACE)");
-extern _Alignas(TIMPACK) TIMPACK TimP=
+extern TIMPACK TimP=
 {
 	{
 		{
@@ -184,4 +181,3 @@ extern _Alignas(TIMPACK) TIMPACK TimP=
 	}
 };
 extern TIMPACK *TimP_(void) { return &TimP; }
-#endif

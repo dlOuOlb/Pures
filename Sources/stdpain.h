@@ -1,5 +1,5 @@
-﻿#ifndef xSTDPAIN_SRC
-#define xSTDPAIN_SRC
+﻿#ifndef xSTDPAIN_SRC_
+#define xSTDPAIN_SRC_
 
 #if(defined(__STDC__)&&(__STDC__))
 
@@ -16,6 +16,13 @@
 #if(defined(__STDC_NO_THREADS__)&&(__STDC_NO_THREADS__))
 #error The implementation does not support multithreading.
 #else
+
+_Static_assert((sizeof(void*)&(sizeof(void*)-1))==0,"sizeof(void*) != 1<<N");
+_Static_assert(sizeof(void*)==sizeof(union xstdp_u*),"sizeof(void*) != sizeof(union*)");
+_Static_assert(sizeof(void*)==sizeof(struct xstdp_s*),"sizeof(void*) != sizeof(struct*)");
+
+_Static_assert((sizeof(void(*)(void))&(sizeof(void(*)(void))-1))==0,"sizeof(void(*)(void)) != 1<<N");
+_Static_assert(sizeof(void(*)(void))==sizeof(union xstdp_u(*)(struct xstdp_s)),"sizeof(void(*)(void)) != sizeof(union(*)(struct))");
 
 #define __STDC_WANT_LIB_EXT1__ (1)
 

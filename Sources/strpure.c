@@ -1,12 +1,6 @@
 ﻿#include "stdpain.h"
 #include "strpure.h"
 
-#if(1)
-typedef char strp_nc;
-typedef const char STRP_NC;
-#endif
-
-#if(1)
 static const struct
 {
 	_Alignas(16) const char Version[16];
@@ -17,7 +11,7 @@ static const struct
 }
 xPost=
 {
-	.Version=oSTRPURE_INC,
+	.Version=oSTRPURE_INC_,
 	.Bool=
 	{
 		.Success=true,
@@ -41,9 +35,10 @@ xPost=
 	},
 	.Locale="C"
 };
-#endif
 
 #if(1)
+typedef char strp_nc; typedef const strp_nc STRP_NC;
+
 static char *xStrP_NC_Find_Forward_(const char *const String,const char Character) { return strchr(String,Character); }
 static char *xStrP_NC_Find_Reverse_(const char *const String,const char Character) { return strrchr(String,Character); }
 
@@ -67,9 +62,8 @@ static _Bool StrP_Locale_Get_(const int Category,const size_t Size,char *const B
 static _Bool StrP_Locale_Set_(const int Category,const char *const Locale) { return ((setlocale(Category,Locale))&&(true)); }
 #endif
 
-#if(1)
 _Static_assert(sizeof(STRPACK)==(sizeof(STRPACE)<<6),"sizeof(STRPACK) != 64*sizeof(STRPACE)");
-extern _Alignas(STRPACK) STRPACK StrP=
+extern STRPACK StrP=
 {
 	{
 		.Version=xPost.Version,
@@ -193,4 +187,3 @@ extern _Alignas(STRPACK) STRPACK StrP=
 	}
 };
 extern STRPACK *StrP_(void) { return &StrP; }
-#endif

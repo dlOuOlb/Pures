@@ -1,5 +1,5 @@
-﻿#ifdef oSTRPURE_INC
-#ifdef xSTRPAIN_SRC
+﻿#ifdef oSTRPURE_INC_
+#ifdef xSTRPAIN_SRC_
 
 static size_t Punc_(Length)(TT_XXXX *const Str) { return xStrP_Length_(Str->TT,OxXXXX); }
 static size_t Punc_(Find)(TT_XXXX *const Str,TT_UNIT Char,const _Bool Mode)
@@ -69,7 +69,9 @@ static _Bool Punc_(Gets)(FILE *const restrict Stream,tt_xxxx *const restrict Str
 #define TT_XXXX Conc_(TT_UNIT,Conc_(_0X,XXXX))
 #endif
 
-#define xSTRPAIN_SRC
+#define xSTRPAIN_SRC_
+
+#if(1)
 
 #if(1)
 #define tt nc
@@ -83,7 +85,9 @@ static _Bool Punc_(Gets)(FILE *const restrict Stream,tt_xxxx *const restrict Str
 #define xStrP_Comp_ strncmp
 #define xStrP_Cast_ strncpy_s
 #define xStrP_Gets_ fgets
+#endif
 
+#if(1)
 #define XXXX 0010
 #include "strpain.c"
 #undef XXXX
@@ -96,7 +100,9 @@ static _Bool Punc_(Gets)(FILE *const restrict Stream,tt_xxxx *const restrict Str
 #define XXXX 0400
 #include "strpain.c"
 #undef XXXX
+#endif
 
+#if(1)
 #undef xStrP_Gets_
 #undef xStrP_Cast_
 #undef xStrP_Comp_
@@ -110,7 +116,9 @@ static _Bool Punc_(Gets)(FILE *const restrict Stream,tt_xxxx *const restrict Str
 #undef tt
 #endif
 
-#undef xSTRPAIN_SRC
+#endif
+
+#undef xSTRPAIN_SRC_
 
 #if(1)
 #undef TT_XXXX

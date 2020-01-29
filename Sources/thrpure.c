@@ -1,35 +1,8 @@
 ﻿#include "stdpain.h"
 #include "thrpure.h"
 
-#if(1)
-typedef struct { _Alignas(max_align_t) struct { thrp_p_ Proc_;size_t Size; }; }thrp_tp;
-typedef const thrp_tp THRP_TP;
-
-struct othrp_qu
-{
-	_Alignas(max_align_t) struct
-	{
-		void(*Free_)(void *const),*(*Alloc_)(void *const,const size_t,const size_t);
-		mtx_t Lock,Wait;
-		size_t Capacity,Count;
-		thrp_tp *Pin[2];
-		thrd_t Thread;
-	};
-};
-struct othrp_mu
-{
-	_Alignas(max_align_t) struct
-	{
-		void(*Free_)(void *const);
-		mtx_t Tex;
-	};
-};
-#endif
-
-#if(1)
 static void xThrP_UM_Return_(void *const Memory) { free(Memory);return; }
 static void *xThrP_UM_Borrow_(void *const Owner,const size_t Align,const size_t Size) { (void)(Owner);return aligned_alloc(Align,Size); }
-
 static const struct
 {
 	_Alignas(16) const char Version[16];
@@ -40,7 +13,7 @@ static const struct
 }
 xPost=
 {
-	.Version=oTHRPURE_INC,
+	.Version=oTHRPURE_INC_,
 	.Handle=
 	{
 		.Return_=xThrP_UM_Return_,
@@ -62,6 +35,7 @@ xPost=
 };
 static struct { mtx_t *const Qu,*const Mu; }xGLock={.Qu=&(mtx_t) { 0 },.Mu=&(mtx_t) { 0 }};
 
+#if(1)
 static size_t xThrP_Padding_(register size_t V) { const size_t T=_Alignof(max_align_t);V--;V+=T;V/=T;V*=T;return V; }
 static int xThrP_Exist_Thread_(const thrd_t Thread) { return memcmp(&Thread,&(xPost.Empty),sizeof(thrd_t)); }
 static void xThrP_Empty_Thread_(thrd_t *const restrict Thread) { memcpy(Thread,&(xPost.Empty),sizeof(thrd_t));return; }
@@ -69,6 +43,19 @@ static int xThrP_Flag_(register const int Flag,register const int Temp) { return
 #endif
 
 #if(1)
+typedef struct { _Alignas(max_align_t) struct { thrp_p_ Proc_;size_t Size; }; } thrp_tp; typedef const thrp_tp THRP_TP;
+struct othrp_qu
+{
+	_Alignas(max_align_t) struct
+	{
+		void(*Free_)(void *const),*(*Alloc_)(void *const,const size_t,const size_t);
+		mtx_t Lock,Wait;
+		size_t Capacity,Count;
+		thrp_tp *Pin[2];
+		thrd_t Thread;
+	};
+};
+
 #if(1)
 static void xThrP_Qu_Exit_Once_(void) { mtx_destroy(xGLock.Qu);return; }
 static void xThrP_Qu_Exit_(void) { static once_flag xFlagExit=ONCE_FLAG_INIT;call_once(&xFlagExit,xThrP_Qu_Exit_Once_);return; }
@@ -450,9 +437,19 @@ static int ThrP_Qu_Delete_(thrp_qu **const Ptr)
 	return thrd_error;
 }
 #endif
+
 #endif
 
 #if(1)
+struct othrp_mu
+{
+	_Alignas(max_align_t) struct
+	{
+		void(*Free_)(void *const);
+		mtx_t Tex;
+	};
+};
+
 #if(1)
 static void xThrP_Mu_Exit_Once_(void) { mtx_destroy(xGLock.Mu);return; }
 static void xThrP_Mu_Exit_(void) { static once_flag xFlagExit=ONCE_FLAG_INIT;call_once(&xFlagExit,xThrP_Mu_Exit_Once_);return; }
@@ -633,6 +630,7 @@ static int ThrP_Mu_Delete_(thrp_mu **const Ptr)
 	return thrd_error;
 }
 #endif
+
 #endif
 
 #if(1)
@@ -686,9 +684,8 @@ static _Bool ThrP_Thread_Break_(const void *const Arg) { (void)(Arg);return fals
 static _Bool ThrP_Thread_Print_(const void *const Arg) { return (puts(Arg)>=0); }
 #endif
 
-#if(1)
 _Static_assert(sizeof(THRPACK)==(sizeof(THRPACE)<<4),"sizeof(THRPACK) != 16*sizeof(THRPACE)");
-extern _Alignas(THRPACK) THRPACK ThrP=
+extern THRPACK ThrP=
 {
 	{
 		.Version=xPost.Version,
@@ -719,4 +716,3 @@ extern _Alignas(THRPACK) THRPACK ThrP=
 	}
 };
 extern THRPACK *ThrP_(void) { return &ThrP; }
-#endif
