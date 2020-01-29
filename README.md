@@ -106,7 +106,7 @@ Flag = ThrP.Mu.Give_( &Mu, false );
 /* handle the possible error */
 ```
 
-Or just simply, with an abusive [macro](./Headers/thrpure.h#L180-L182) [#](http://github.com/dlOuOlb/Pures/blob/master/Headers/thrpure.h#L180-L182)
+Or just simply, with an abusive [macro](./Headers/thrpure.h#L183-L196) [#](http://github.com/dlOuOlb/Pures/blob/master/Headers/thrpure.h#L183-L196)
 
 ```c
 // wait, lock, do, unlock
