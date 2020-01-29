@@ -5,18 +5,24 @@ static_assert(sizeof(void*)==sizeof(void(*)(void)),"");
 #pragma warning(disable:4201)
 #endif
 
+#if(1)
 #define __STDC_WANT_LIB_EXT1__ (1)
 
 #define uPURES_DLL_IMPORT_ __declspec(dllimport)//only for DLL usage
 #define uSTRP_MACRO_DEFINE_
 #include <strpure.h>
 #undef uSTRP_MACRO_DEFINE_
+#ifdef _MSC_BUILD
+#define ThrP_Qu_Push_(Queue,Proc_,TYPE,...) ThrP.Qu.Push_((Queue),(Proc_),sizeof(TYPE),&(TYPE){__VA_ARGS__})
+#else
 #define uTHRP_MACRO_DEFINE_
+#endif
 #include <thrpure.h>
 #undef uTHRP_MACRO_DEFINE_
 #undef uPURES_DLL_IMPORT_
 
 #include <stdlib.h>
+#endif
 
 static _Bool My_Process_(const void *const);//function for task example
 typedef const struct { const int Period,Repeat;const char Msg[32]; }MY_TASK;//task argument holder
