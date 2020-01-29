@@ -1,5 +1,5 @@
-﻿#ifndef oSTRPURE_INC
-#define oSTRPURE_INC "StrP:2019.12.27"
+﻿#ifndef oSTRPURE_INC_
+#define oSTRPURE_INC_ "StrP:2020.01.29"
 /*------------------------------------------------------------------+
 |	StrPure provides some inflexible string handling functions.		|
 |																	|
@@ -22,19 +22,19 @@
 #include <stdio.h>
 
 //StrPure : char [0x0010] Holder
-typedef struct { char NC[0x0010]; }strp_nc_0x0010;typedef const strp_nc_0x0010 STRP_NC_0X0010;
+typedef struct { char NC[0x0010]; } strp_nc_0x0010; typedef const strp_nc_0x0010 STRP_NC_0X0010;
 
 //StrPure : char [0x0040] Holder
-typedef struct { char NC[0x0040]; }strp_nc_0x0040;typedef const strp_nc_0x0040 STRP_NC_0X0040;
+typedef struct { char NC[0x0040]; } strp_nc_0x0040; typedef const strp_nc_0x0040 STRP_NC_0X0040;
 
 //StrPure : char [0x0100] Holder
-typedef struct { char NC[0x0100]; }strp_nc_0x0100;typedef const strp_nc_0x0100 STRP_NC_0X0100;
+typedef struct { char NC[0x0100]; } strp_nc_0x0100; typedef const strp_nc_0x0100 STRP_NC_0X0100;
 
 //StrPure : char [0x0400] Holder
-typedef struct { char NC[0x0400]; }strp_nc_0x0400;typedef const strp_nc_0x0400 STRP_NC_0X0400;
+typedef struct { char NC[0x0400]; } strp_nc_0x0400; typedef const strp_nc_0x0400 STRP_NC_0X0400;
 
-//StrPure : Library Alignment Union
-typedef const union { const size_t S;const void *const X;void(*const X_)(void); }STRPACE;
+//StrPure : Latent Union for Library Alignment
+typedef const union { const size_t S;const void *const X;void(*const X_)(void); } STRPACE;
 
 //StrPure : Library Pack Structure
 typedef const struct
@@ -328,17 +328,26 @@ uPURES_DLL_IMPORT_
 #endif
 
 //StrPure : Library Pack Object
-extern _Alignas(STRPACK) STRPACK StrP;
-//StrPure : Indirect access to the library pack object. (&StrP)
-extern STRPACK *StrP_(void);
+extern STRPACK StrP,*StrP_(void);
 
 #ifdef uSTRP_MACRO_DEFINE_
+
+#if(1)
 //StrPure : Nullify the first character of the narrow string.
 //＊Return bool is true for success, false for failure.
 #define StrP_NC_Null_(T) ((T)&&((xStrP_NC_Guard_T_(T)->NC[0]='\0')=='\0'))
 //StrPure : Abbreviation of "StrP.NC.Cast.x####.x####_".
 //＊Return flag is zero for success, non-zero for failure.
-#define StrP_NC_Cast_(T,S) _Generic((T),strp_nc_0x0010*:xStrP_NC_Generic_(Cast.x0010,S),strp_nc_0x0040*:xStrP_NC_Generic_(Cast.x0040,S),strp_nc_0x0100*:xStrP_NC_Generic_(Cast.x0100,S),strp_nc_0x0400*:xStrP_NC_Generic_(Cast.x0400,S))((T),(S))
+#define StrP_NC_Cast_(T,S)\
+_Generic\
+(\
+	(T),\
+		strp_nc_0x0010*:xStrP_NC_Generic_(Cast.x0010,S),\
+		strp_nc_0x0040*:xStrP_NC_Generic_(Cast.x0040,S),\
+		strp_nc_0x0100*:xStrP_NC_Generic_(Cast.x0100,S),\
+		strp_nc_0x0400*:xStrP_NC_Generic_(Cast.x0400,S)\
+)\
+((T),(S))
 //StrPure : Abbreviation of "StrP.NC.Find.Char.x####_".
 //＊Return flag is zero for success, non-zero for failure.
 #define StrP_NC_Find_Char_(String,Character,Mode) xStrP_NC_Generic_(Find.Char,String)((String),(Character),(Mode))
@@ -369,6 +378,7 @@ extern STRPACK *StrP_(void);
 //StrPure : Abbreviation of "StrP.NC.Gets.x####_".
 //＊Return bool is true for success, false for failure.
 #define StrP_NC_Gets_(Stream,String) xStrP_NC_Generic_(Gets,String)((Stream),(String))
+#endif
 
 #if(defined(__STDC_WANT_LIB_EXT1__)&&(__STDC_WANT_LIB_EXT1__))
 //StrPure : String I/O with the specified format.
@@ -388,14 +398,44 @@ extern STRPACK *StrP_(void);
 #define xStrP_IO_Format_(Mode,Stream,...) (xStrP_IO_Format_##Mode##_(Stream,__VA_ARGS__)>=0)
 #define xStrP_IO_Format_I_(I,...) fscanf_s((I)?(I):(stdin),__VA_ARGS__)
 #define xStrP_IO_Format_O_(O,...) fprintf_s((O)?(O):(stdout),__VA_ARGS__)
+
+#else
+#error #define __STDC_WANT_LIB_EXT1__ (1) before #include <strpure.h>
 #endif
 
+#if(1)
 //StrPure : Type Guard for Source String
-#define xStrP_NC_Guard_S_(S) _Generic(*(S),strp_nc_0x0010:(S),strp_nc_0x0040:(S),strp_nc_0x0100:(S),strp_nc_0x0400:(S))
+#define xStrP_NC_Guard_S_(S)\
+_Generic\
+(\
+	*(S),\
+		strp_nc_0x0010:(S),\
+		strp_nc_0x0040:(S),\
+		strp_nc_0x0100:(S),\
+		strp_nc_0x0400:(S)\
+)
 //StrPure : Type Guard for Target String
-#define xStrP_NC_Guard_T_(T) _Generic((T),strp_nc_0x0010*:(T),strp_nc_0x0040*:(T),strp_nc_0x0100*:(T),strp_nc_0x0400*:(T))
+#define xStrP_NC_Guard_T_(T)\
+_Generic\
+(\
+	(T),\
+		strp_nc_0x0010*:(T),\
+		strp_nc_0x0040*:(T),\
+		strp_nc_0x0100*:(T),\
+		strp_nc_0x0400*:(T)\
+)
 //StrPure : Generic for 'strp_nc_0x####*' or 'STRP_NC_0X####*'.
-#define xStrP_NC_Generic_(Func,S) _Generic(*(S),strp_nc_0x0010:StrP.NC.Func.x0010_,strp_nc_0x0040:StrP.NC.Func.x0040_,strp_nc_0x0100:StrP.NC.Func.x0100_,strp_nc_0x0400:StrP.NC.Func.x0400_)
+#define xStrP_NC_Generic_(Func,S)\
+_Generic\
+(\
+	*(S),\
+		strp_nc_0x0010:StrP.NC.Func.x0010_,\
+		strp_nc_0x0040:StrP.NC.Func.x0040_,\
+		strp_nc_0x0100:StrP.NC.Func.x0100_,\
+		strp_nc_0x0400:StrP.NC.Func.x0400_\
+)
+#endif
+
 #endif
 
 #endif

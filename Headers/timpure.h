@@ -1,5 +1,5 @@
-﻿#ifndef oTIMPURE_INC
-#define oTIMPURE_INC "TimP:2019.12.27"
+﻿#ifndef oTIMPURE_INC_
+#define oTIMPURE_INC_ "TimP:2020.01.29"
 /*------------------------------------------------------------------+
 |	TimPure provides some time representing functions.				|
 |																	|
@@ -26,10 +26,10 @@
 #include <time.h>
 
 //TimPure : Textual Representation for Time
-typedef struct { char Tx[32]; }timp_tx;typedef const timp_tx TIMP_TX;
+typedef struct { char Tx[32]; } timp_tx; typedef const timp_tx TIMP_TX;
 
-//TimPure : Library Alignment Union
-typedef const union { const size_t S;const void *const X;void(*const X_)(void); }TIMPACE;
+//TimPure : Latent Union for Library Alignment
+typedef const union { const size_t S;const void *const X;void(*const X_)(void); } TIMPACE;
 
 //TimPure : Library Pack Structure
 typedef const struct
@@ -141,27 +141,41 @@ uPURES_DLL_IMPORT_
 #endif
 
 //TimPure : Library Pack Object
-extern _Alignas(TIMPACK) TIMPACK TimP;
-//TimPure : Indirect access to the library pack object. (&TimP)
-extern TIMPACK *TimP_(void);
+extern TIMPACK TimP,*TimP_(void);
 
 #ifdef uTIMP_MACRO_DEFINE_
+
+#if(1)
 //TimPure : Abbreviation of "TimP.Text.Val_" or "TimP.Text.Obj_".
 #define TimP_Text_(Time) _Generic((Time),time_t:TimP.Text.Val_,struct tm:TimP.Text.Obj_)(Time)
 //TimPure : Abbreviation of combined calls of "TimP.Val.Now_" and "TimP.Text.Val_".
 #define TimP_Text_Val_Now_() TimP.Text.Val_(TimP.Val.Now_())
 //TimPure : Abbreviation of combined calls of "TimP.Obj.Now_" and "TimP.Text.Obj_".
 #define TimP_Text_Obj_Now_() TimP.Text.Obj_(TimP.Obj.Now_())
+#endif
+
+#if(1)
 //TimPure : Abbreviation of a once-loop over "TimP.Spec.Now_" and "TimP.Spec.Sum_".
 //＊Do not jump over the loop block, e.g. 'goto', 'break', and 'return'.
-#define TimP_Spec_Run_Do_(TimeSpec) for(const struct timespec(xTimP_Temp_(Mark))=TimP.Spec.Now_(),*(xTimP_Temp_(Coin))=&(xTimP_Temp_(Mark));(xTimP_Temp_(Coin));(TimeSpec)=TimP.Spec.Sum_((TimeSpec),(xTimP_Temp_(Mark))),(xTimP_Temp_(Coin))=NULL)
+#define TimP_Spec_Run_Do_(TimeSpec)\
+for\
+(\
+	const struct timespec*restrict xTimP_Temp_(Mark)=&(const struct timespec){TimP.Spec.Now_()};\
+	_Generic((TimeSpec),struct timespec:xTimP_Temp_(Mark));\
+	(TimeSpec)=TimP.Spec.Sum_((TimeSpec),*xTimP_Temp_(Mark)),\
+	xTimP_Temp_(Mark)=(NULL)\
+)
+#endif
 
+#if(1)
 //TimPure : Macro for naming.
 #define xTimP_Temp_(Var) xTimP_Temp_Wrap_(xTimP,Var,__LINE__)
 //TimPure : Macro for expansion.
 #define xTimP_Temp_Wrap_(Prefix,Name,Suffix) xTimP_Temp_Conc_(Prefix,Name,Suffix)
 //TimPure : Macro for concatenation.
 #define xTimP_Temp_Conc_(Prefix,Name,Suffix) Prefix##Name##Suffix
+#endif
+
 #endif
 
 #endif

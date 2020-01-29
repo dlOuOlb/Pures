@@ -1,5 +1,5 @@
-﻿#ifndef oTHRPURE_INC
-#define oTHRPURE_INC "ThrP:2019.12.27"
+﻿#ifndef oTHRPURE_INC_
+#define oTHRPURE_INC_ "ThrP:2020.01.29"
 /*------------------------------------------------------------------+
 |	ThrPure provides some simple thread managing functions.			|
 |																	|
@@ -20,19 +20,19 @@
 #include <stddef.h>
 
 //ThrPure : User-Provided Memory Handler
-typedef struct { void(*Return_)(void *const Memory),*(*Borrow_)(void *const Owner,const size_t Align,const size_t Size); }thrp_um;typedef const thrp_um THRP_UM;
+typedef struct { void(*Return_)(void *const Memory),*(*Borrow_)(void *const Owner,const size_t Align,const size_t Size); } thrp_um; typedef const thrp_um THRP_UM;
 
 //ThrPure : Process Function Pointer
-typedef _Bool(*thrp_p_)(const void *const Arg);typedef const thrp_p_ THRP_P_;
+typedef _Bool(*thrp_p_)(const void *const Arg); typedef const thrp_p_ THRP_P_;
 
 //ThrPure : Task Queue
-typedef struct othrp_qu thrp_qu;typedef const thrp_qu THRP_QU;
+typedef struct othrp_qu thrp_qu; typedef const thrp_qu THRP_QU;
 
 //ThrPure : Mutex Holder
-typedef struct othrp_mu thrp_mu;typedef const thrp_mu THRP_MU;
+typedef struct othrp_mu thrp_mu; typedef const thrp_mu THRP_MU;
 
-//ThrPure : Library Alignment Union
-typedef const union { const size_t S;const void *const X;void(*const X_)(void); }THRPACE;
+//ThrPure : Latent Union for Library Alignment
+typedef const union { const size_t S;const void *const X;void(*const X_)(void); } THRPACE;
 
 //ThrPure : Library Pack Structure
 typedef const struct
@@ -162,31 +162,49 @@ uPURES_DLL_IMPORT_
 #endif
 
 //ThrPure : Library Pack Object
-extern _Alignas(THRPACK) THRPACK ThrP;
-//ThrPure : Indirect access to the library pack object. (&ThrP)
-extern THRPACK *ThrP_(void);
+extern THRPACK ThrP,*ThrP_(void);
 
 #ifdef uTHRP_MACRO_DEFINE_
+
+#if(1)
 //ThrPure : Abbreviation of "ThrP.Task.Yield_" with a null pointer.
 #define ThrP_Task_Yield_() ThrP.Task.Yield_(NULL)
 //ThrPure : Abbreviation of "ThrP.Task.Break_" with a null pointer.
 #define ThrP_Task_Break_() ThrP.Task.Break_(NULL)
 //ThrPure : Abbreviation of "ThrP.Task.Sleep_" with an instant 'int' value.
 #define ThrP_Task_Sleep_(Milliseconds) _Generic((Milliseconds),int:ThrP.Task.Sleep_)(&(const int){(Milliseconds)})
-//ThrPure : Alias for "ThrP.Task.Print_" with a 'char*' type guard.
-#define ThrP_Task_Print_(Message) _Generic((Message),char*:ThrP.Task.Print_)(Message)
+//ThrPure : Alias for "ThrP.Task.Print_" with a type guard.
+#define ThrP_Task_Print_(Message) _Generic(*(Message),char:ThrP.Task.Print_)(Message)
+#endif
+
+#if(1)
 //ThrPure : Abbreviation of "ThrP.Qu.Push_" with an instant argument.
-#define ThrP_Qu_Push_(Queue,Proc_,TYPE,...) ThrP.Qu.Push_((Queue),(Proc_),sizeof(TYPE),&(TYPE){__VA_ARGS__})
+#define ThrP_Qu_Push_(Queue,Proc_,TYPE,...) _Generic(*(Queue),thrp_qu*:ThrP.Qu.Push_)((Queue),(Proc_),sizeof(TYPE),&(TYPE){__VA_ARGS__})
 //ThrPure : Abbreviation of a once-loop over "ThrP.Mu.Take_" and "ThrP.Mu.Give_".
 //＊Do not jump over the loop block, e.g. 'goto', 'break', and 'return'.
-#define ThrP_Mu_Lock_Do_(Ret,Mutex) for(_Bool(xThrP_Temp_(Flag))=(((Ret)=ThrP.Mu.Take_((Mutex),1))==ThrP.Flag->Success);(xThrP_Temp_(Flag));(Ret)=(ThrP.Mu.Give_((Mutex),(xThrP_Temp_(Flag))=0)==(ThrP.Flag->Busy))?(ThrP.Flag->Success):(ThrP.Flag->Error))
+#define ThrP_Mu_Lock_Do_(Ret,Mutex)\
+for\
+(\
+	_Bool(xThrP_Temp_(Flag))=\
+		(ThrP.Flag->Success==(Ret))&&\
+		(ThrP.Flag->Success==((Ret)=ThrP.Mu.Take_((Mutex),(1))));\
+	_Generic((Ret),int:_Generic(*(Mutex),thrp_mu*:xThrP_Temp_(Flag)));\
+	(Ret)=\
+		(ThrP.Flag->Busy==ThrP.Mu.Give_((Mutex),xThrP_Temp_(Flag)=(0)))?\
+		(ThrP.Flag->Success):\
+		(ThrP.Flag->Error)\
+)
+#endif
 
+#if(1)
 //ThrPure : Macro for naming.
 #define xThrP_Temp_(Var) xThrP_Temp_Wrap_(xThrP,Var,__LINE__)
 //ThrPure : Macro for expansion.
 #define xThrP_Temp_Wrap_(Prefix,Name,Suffix) xThrP_Temp_Conc_(Prefix,Name,Suffix)
 //ThrPure : Macro for concatenation.
 #define xThrP_Temp_Conc_(Prefix,Name,Suffix) Prefix##Name##Suffix
+#endif
+
 #endif
 
 #endif
